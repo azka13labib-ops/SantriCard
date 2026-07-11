@@ -29,4 +29,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function siswas()
+    {
+        return $this->hasMany(Siswa::class, 'ortu_id');
+    }
+
+    public function pedagang()
+    {
+        return $this->hasOne(Pedagang::class);
+    }
 }
