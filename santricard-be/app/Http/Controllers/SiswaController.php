@@ -3,46 +3,115 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Siswa;
+use App\Models\Kartu;
+use Illuminate\Support\Str;
 
 class SiswaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $siswas = Siswa::with('ortu', 'kartu')->get();
+        return response()->json($siswas);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'ortu_id' => 'required|exists:users,id',
+            'nis' => 'required|unique:siswas',
+            'nama' => 'required|string',
+            'kelas' => 'required|string',
+            'limit_harian' => 'required|numeric'
+        ]);
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            $siswa = Siswa::create([
+                'ortu_id' => $request->ortu_id,
+                'nis' => $request->nis,
+                'nama' => $request->nama,
+                'kelas' => $request->kelas,
+                'saldo_virtual' => 0,
+                'limit_harian' => $request->limit_harian,
+                'aktif' => true,
+            ]);
+
+            // Generate Kartu
+            $uid_rfid = Str::random(10); // Dummy RFID for now if no scanner
+            $qr_code_hash = hash('sha256', $siswa->nis . time());
+
+            Kartu::create([
+                'siswa_id' => $siswa->id,
+                'uid_rfid' => $uid_rfid,
+                'qr_code_hash' => $qr_code_hash,
+                'status_aktif' => true,
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return response()->json(['message' => 'Siswa berhasil ditambahkan', 'data' => $siswa->load('kartu')], 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['message' => 'Gagal menambah siswa', 'error' => $e->getMessage()], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $siswa = Siswa::with('ortu', 'kartu')->findOrFail($id);
+        return response()->json($siswa);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $siswa = Siswa::findOrFail($id);
+        
+        $request->validate([
+            'nama' => 'sometimes|string',
+            'kelas' => 'sometimes|string',
+            'limit_harian' => 'sometimes|numeric'
+        ]);
+
+        $siswa->update($request->only('nama', 'kelas', 'limit_harian'));
+
+        return response()->json(['message' => 'Siswa berhasil diupdate', 'data' => $siswa]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $siswa = Siswa::findOrFail($id);
+        $siswa->update(['aktif' => false]);
+        
+        if ($siswa->kartu) {
+            $siswa->kartu->update(['status_aktif' => false]);
+        }
+
+        return response()->json(['message' => 'Siswa berhasil dinonaktifkan']);
+    }
+
+    public function saldo($id)
+    {
+        $siswa = Siswa::findOrFail($id);
+        
+        return response()->json([
+            'siswa_id' => $siswa->id,
+            'nama' => $siswa->nama,
+            'saldo' => $siswa->saldo_virtual,
+            'limit_harian' => $siswa->limit_harian,
+            'sisa_limit' => $siswa->sisa_limit_hari_ini
+        ]);
+    }
+
+    public function histori($id)
+    {
+        $siswa = Siswa::findOrFail($id);
+        
+        $transaksis = $siswa->transaksis()->with('pedagang:id,nama_kantin')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json($transaksis);
     }
 }
