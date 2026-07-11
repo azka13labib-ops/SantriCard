@@ -1,10 +1,10 @@
-# Setup Backend — Laravel
+# Setup Backend — Laravel 13
 
 ---
 
 ## Prasyarat
 
-- PHP >= 8.1
+- PHP >= 8.2
 - Composer
 - MySQL 8+
 - Node.js (untuk asset)

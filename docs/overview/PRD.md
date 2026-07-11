@@ -1,4 +1,4 @@
-﻿# Product Requirements Document (PRD) — SantriCard
+# Product Requirements Document (PRD) — SantriCard
 
 ---
 
@@ -14,7 +14,7 @@ Sistem manajemen kartu untuk santri agar bisa bertransaksi tanpa uang tunai di l
 - Monitoring histori oleh orang tua
 
 ## 3. Scope MVP (Minimum Viable Product)
-- Backend API (Laravel)
-- Web App Admin (React/Blade)
-- Web App Kasir Pedagang (React/Blade)
-- Web App Monitoring Orang Tua (React/Blade)
+- Backend API (Laravel 13)
+- Web App Admin (Next.js + Tailwind)
+- Web App Kasir Pedagang (Next.js + Tailwind)
+- Web App Monitoring Orang Tua (Next.js + Tailwind)

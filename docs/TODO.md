@@ -7,7 +7,7 @@ Gunakan file ini untuk melacak *progress* (perkembangan) Anda. Ubah `[ ]` menjad
 ---
 
 ## Tahap 1: Persiapan & Setup Awal
-- [ ] Install Laravel 10+ (`composer create-project laravel/laravel santricard-api`)
+- [ ] Install Laravel 13 (`composer create-project laravel/laravel santricard-api`)
 - [ ] Setup konfigurasi database di file `.env`
 - [ ] Install Laravel Sanctum (`composer require laravel/sanctum`)
 - [ ] Install library QR Code (`composer require simplesoftwareio/simple-qrcode`)
@@ -52,8 +52,9 @@ Gunakan file ini untuk melacak *progress* (perkembangan) Anda. Ubah `[ ]` menjad
 - [ ] Buat Command Artisan (`php artisan make:command ResetLimitHarian`)
 - [ ] Daftarkan command tersebut di `app/Console/Kernel.php` agar jalan setiap jam 00:00 (otomatisasi *refresh* limit harian)
 
-## Tahap 7: Frontend Web Apps (React/Blade)
-- [ ] Setup project Frontend (Vite/React atau Laravel Blade)
+## Tahap 7: Frontend Web Apps (Next.js + Tailwind + Axios)
+- [ ] Setup project Frontend (`pnpm create next-app@latest`)
+- [ ] Install Axios (`pnpm add axios`) dan konfigurasi interceptors (untuk Bearer Token)
 - [ ] Buat **Halaman Login** (Semua Role)
 - [ ] Buat **Dashboard Admin** (Kelola Siswa, Top-Up, Pedagang, Settlement)
 - [ ] Buat **Halaman Kasir Pedagang** (Tampilan untuk kamera HP scan QR Code & Input Nominal)

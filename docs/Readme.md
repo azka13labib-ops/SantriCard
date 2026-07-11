@@ -73,8 +73,9 @@ docs/
 
 | Layer | Teknologi |
 |-------|----------|
-| Backend | Laravel 10+ |
-| Frontend | React |
+| Backend API | Laravel 13 |
+| Frontend Web | Next.js (React) + Tailwind CSS |
+| Data Fetching | Axios |
 | Database | MySQL |
 | Queue/Scheduler | Laravel Scheduler (cron) |
 | Auth | Laravel Sanctum |
