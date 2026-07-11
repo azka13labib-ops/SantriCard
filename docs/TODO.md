@@ -40,12 +40,12 @@ Gunakan file ini untuk melacak *progress* (perkembangan) Anda. Ubah `[ ]` menjad
 
 ## Tahap 5: Fitur Backend Utama (Controllers)
 *(Referensi: `docs/api/endpoints.md`)*
-- [ ] Buat `SiswaController` (CRUD siswa, generate kartu, dan block kartu)
-- [ ] Buat `TopupController` (Logika tambah saldo siswa)
-- [ ] Buat `PedagangController` (CRUD pedagang)
+- [x] Buat `SiswaController` (CRUD siswa, generate kartu, dan block kartu)
+- [x] Buat `TopupController` (Logika tambah saldo siswa)
+- [x] Buat `PedagangController` (CRUD pedagang)
 - [x] Buat `TransaksiController` (Logika inti: Validasi pedagang -> Validasi Saldo -> Validasi Limit -> Potong Saldo)
-- [ ] Buat `SettlementController` (Logika pencairan dana pedagang ke 0)
-- [ ] Buat `DashboardController` (API ringkasan untuk admin)
+- [x] Buat `SettlementController` (Logika pencairan dana pedagang ke 0)
+- [x] Buat `DashboardController` (API ringkasan untuk admin)
 
 ## Tahap 6: Cron Job & Scheduler
 *(Referensi: `docs/architecture/alur-sistem.md`)*
