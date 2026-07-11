@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('kartus', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
+            $table->string('uid_rfid', 50)->unique();
+            $table->string('qr_code_hash', 100)->unique();
+            $table->boolean('status_aktif')->default(true);
             $table->timestamps();
         });
     }

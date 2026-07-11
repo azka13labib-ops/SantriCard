@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('topups', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
+            $table->decimal('nominal', 10, 2);
+            $table->enum('metode', ['qris_statis']);
+            $table->enum('status', ['pending', 'berhasil', 'gagal'])->default('pending');
+            $table->string('bukti_transfer')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

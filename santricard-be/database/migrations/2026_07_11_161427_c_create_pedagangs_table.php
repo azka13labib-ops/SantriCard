@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('pedagangs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string('nama_kantin', 100);
+            $table->string('lokasi', 100)->nullable();
+            $table->decimal('saldo_mengendap', 10, 2)->default(0);
             $table->timestamps();
         });
     }
