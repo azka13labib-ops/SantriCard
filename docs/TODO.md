@@ -7,43 +7,43 @@ Gunakan file ini untuk melacak *progress* (perkembangan) Anda. Ubah `[ ]` menjad
 ---
 
 ## Tahap 1: Persiapan & Setup Awal
-- [ ] Install Laravel 13 (`composer create-project laravel/laravel santricard-api`)
-- [ ] Setup konfigurasi database di file `.env`
-- [ ] Install Laravel Sanctum (`composer require laravel/sanctum`)
-- [ ] Install library QR Code (`composer require simplesoftwareio/simple-qrcode`)
+- [x] Install Laravel 13 (`composer create-project laravel/laravel santricard-api`)
+- [x] Setup konfigurasi database di file `.env`
+- [x] Install Laravel Sanctum (`composer require laravel/sanctum`)
+- [x] Install library QR Code (`composer require simplesoftwareio/simple-qrcode`)
 
 ## Tahap 2: Database & Migrasi
 *(Referensi: `docs/database/migration-guide.md` & `schema.md`)*
-- [ ] Buat file migration untuk `users`
-- [ ] Buat file migration untuk `siswa`
-- [ ] Buat file migration untuk `kartu`
-- [ ] Buat file migration untuk `pedagang`
-- [ ] Buat file migration untuk `transaksi`
-- [ ] Buat file migration untuk `topup`
-- [ ] Buat file migration untuk `settlement`
-- [ ] Jalankan `php artisan migrate`
+- [x] Buat file migration untuk `users`
+- [x] Buat file migration untuk `siswa`
+- [x] Buat file migration untuk `kartu`
+- [x] Buat file migration untuk `pedagang`
+- [x] Buat file migration untuk `transaksi`
+- [x] Buat file migration untuk `topup`
+- [x] Buat file migration untuk `settlement`
+- [x] Jalankan `php artisan migrate`
 
 ## Tahap 3: Model & Relasi
-- [ ] Buat Model `User` dan set up role (`admin`, `pedagang`, `ortu`)
-- [ ] Buat Model `Siswa` (relasi ke `User` ortu, `Kartu`, `Transaksi`, `Topup`)
-- [ ] Buat Model `Kartu` (relasi ke `Siswa`)
-- [ ] Buat Model `Pedagang` (relasi ke `User`, `Transaksi`, `Settlement`)
-- [ ] Buat Model `Transaksi` (relasi ke `Siswa`, `Pedagang`)
-- [ ] Buat Model `Topup` dan `Settlement`
-- [ ] Buat Seeder (`SantriCardSeeder`) untuk data dummy (1 admin, 5 siswa, 3 pedagang)
+- [x] Buat Model `User` dan set up role (`admin`, `pedagang`, `ortu`)
+- [x] Buat Model `Siswa` (relasi ke `User` ortu, `Kartu`, `Transaksi`, `Topup`)
+- [x] Buat Model `Kartu` (relasi ke `Siswa`)
+- [x] Buat Model `Pedagang` (relasi ke `User`, `Transaksi`, `Settlement`)
+- [x] Buat Model `Transaksi` (relasi ke `Siswa`, `Pedagang`)
+- [x] Buat Model `Topup` dan `Settlement`
+- [x] Buat Seeder (`SantriCardSeeder`) untuk data dummy (1 admin, 5 siswa, 3 pedagang)
 
 ## Tahap 4: Autentikasi & Keamanan
 *(Referensi: `docs/api/auth.md`)*
-- [ ] Buat `AuthController` (Fungsi Login & Logout)
-- [ ] Buat Custom Middleware `CheckRole` (untuk filter akses route berdasarkan role admin/pedagang/ortu)
-- [ ] Setup route API di `routes/api.php` dan bungkus dengan middleware Sanctum & Role
+- [x] Buat `AuthController` (Fungsi Login & Logout)
+- [x] Buat Custom Middleware `CheckRole` (untuk filter akses route berdasarkan role admin/pedagang/ortu)
+- [x] Setup route API di `routes/api.php` dan bungkus dengan middleware Sanctum & Role
 
 ## Tahap 5: Fitur Backend Utama (Controllers)
 *(Referensi: `docs/api/endpoints.md`)*
 - [ ] Buat `SiswaController` (CRUD siswa, generate kartu, dan block kartu)
 - [ ] Buat `TopupController` (Logika tambah saldo siswa)
 - [ ] Buat `PedagangController` (CRUD pedagang)
-- [ ] Buat `TransaksiController` (Logika inti: Validasi pedagang -> Validasi Saldo -> Validasi Limit -> Potong Saldo)
+- [x] Buat `TransaksiController` (Logika inti: Validasi pedagang -> Validasi Saldo -> Validasi Limit -> Potong Saldo)
 - [ ] Buat `SettlementController` (Logika pencairan dana pedagang ke 0)
 - [ ] Buat `DashboardController` (API ringkasan untuk admin)
 
