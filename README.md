@@ -10,7 +10,7 @@
 
 ---
 
-**SantriCard** adalah sebuah platform digital tertutup (*closed-loop*) yang dirancang khusus untuk digitalisasi ekosistem keuangan di lingkungan pondok pesantren. Dengan sistem ini, santri tidak perlu lagi membawa uang tunai; cukup menggunakan satu kartu pintar (QR Code) untuk seluruh transaksi jajan sehari-hari.
+**SantriCard** adalah sebuah platform digital tertutup (*closed-loop*) yang dirancang khusus untuk digitalisasi ekosistem keuangan di lingkungan pondok pesantren. Dengan sistem ini, santri tidak perlu lagi membawa uang tunai; cukup menggunakan satu kartu pintar (QR Code) untuk seluruh transaksi jajan sehari-hari
 
 ## Fitur Utama
 
