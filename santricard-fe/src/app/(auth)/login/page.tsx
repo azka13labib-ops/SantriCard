@@ -11,6 +11,7 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -24,9 +25,12 @@ export default function Login() {
       const response = await api.post("/auth/login", { email, password });
       const { token, user } = response.data;
 
-      // Simpan token di Cookie (berlaku 1 hari)
-      Cookies.set("token", token, { expires: 1 });
-      Cookies.set("user_role", user.role, { expires: 1 });
+      // Simpan token di Cookie. 
+      // Jika rememberMe dicentang, token awet 7 hari.
+      // Jika TIDAK dicentang, ini jadi Session Cookie (Otomatis hilang saat browser/tab ditutup sepenuhnya)
+      const cookieOptions = rememberMe ? { expires: 7 } : {};
+      Cookies.set("token", token, cookieOptions);
+      Cookies.set("user_role", user.role, cookieOptions);
 
       // Redirect berdasarkan role
       if (user.role === "admin") {
@@ -141,6 +145,8 @@ export default function Login() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">

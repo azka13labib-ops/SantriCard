@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { LogOut, Loader2 } from "lucide-react";
 import api from "@/lib/axios";
 
 export default function LogoutButton() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -22,9 +20,9 @@ export default function LogoutButton() {
       Cookies.remove("token");
       Cookies.remove("user_role");
       
-      // Tendang ke halaman login
-      router.push("/login");
-      router.refresh(); // Refresh agar state Next.js benar-benar bersih
+      // Tendang ke halaman login dengan hard-reload agar cache Next.js bersih
+      // sehingga tombol back browser tidak bisa melihat cache halaman sebelumnya.
+      window.location.replace("/login");
     }
   };
 
