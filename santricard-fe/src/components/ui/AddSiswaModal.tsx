@@ -73,8 +73,9 @@ export default function AddSiswaModal({ isOpen, onClose, onSiswaAdded }: { isOpe
               }}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border"
               value={formData.nis}
-              onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, nis: e.target.value.replace(/\D/g, '') })}
               placeholder="Misal: 10123984"
+              inputMode="numeric"
             />
           </div>
           
