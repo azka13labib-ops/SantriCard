@@ -19,10 +19,10 @@ class SiswaController extends Controller
     {
         $request->validate([
             'ortu_id' => 'required|exists:users,id',
-            'nis' => 'required|unique:siswas',
+            'nis' => 'required|digits:10|unique:siswas',
             'nama' => 'required|string',
             'kelas' => 'required|string',
-            'limit_harian' => 'required|numeric'
+            'limit_harian' => 'required|numeric|max:20000'
         ]);
 
         \Illuminate\Support\Facades\DB::beginTransaction();

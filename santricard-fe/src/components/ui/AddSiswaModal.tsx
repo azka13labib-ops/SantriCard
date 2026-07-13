@@ -62,6 +62,8 @@ export default function AddSiswaModal({ isOpen, onClose, onSiswaAdded }: { isOpe
             <input
               type="text"
               required
+              minLength={10}
+              maxLength={10}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border"
               value={formData.nis}
               onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
@@ -99,6 +101,7 @@ export default function AddSiswaModal({ isOpen, onClose, onSiswaAdded }: { isOpe
               type="number"
               required
               min="1000"
+              max="20000"
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border"
               value={formData.limit_harian}
               onChange={(e) => setFormData({ ...formData, limit_harian: e.target.value })}
