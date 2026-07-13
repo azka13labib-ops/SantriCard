@@ -44,6 +44,9 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
+        
+        // Transaksi Global
+        Route::get('/transaksi', [TransaksiController::class, 'index']);
     });
 
     // Ortu & Admin Routes

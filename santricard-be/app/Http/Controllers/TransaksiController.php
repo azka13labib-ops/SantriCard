@@ -11,6 +11,15 @@ use App\Models\Transaksi;
 
 class TransaksiController extends Controller
 {
+    public function index()
+    {
+        $transaksis = Transaksi::with(['siswa:id,nama', 'pedagang:id,nama_kantin'])
+            ->orderBy('created_at', 'desc')
+            ->limit(100) // Batasi 100 terakhir agar tidak berat. Aslinya butuh pagination.
+            ->get();
+        return response()->json($transaksis);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
