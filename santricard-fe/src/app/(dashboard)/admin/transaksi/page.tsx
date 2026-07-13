@@ -32,7 +32,9 @@ export default function TransaksiGlobal() {
   };
 
   useEffect(() => {
-    fetchTransaksi();
+    setTimeout(() => {
+      fetchTransaksi();
+    }, 0);
   }, []);
 
   if (loading && transaksis.length === 0) {

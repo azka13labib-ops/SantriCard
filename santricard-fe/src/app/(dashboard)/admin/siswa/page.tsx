@@ -37,7 +37,9 @@ export default function DataSiswa() {
   };
 
   useEffect(() => {
-    fetchSiswa();
+    setTimeout(() => {
+      fetchSiswa();
+    }, 0);
   }, []);
 
   const handleNonaktifkan = async (id: number) => {

@@ -36,7 +36,9 @@ export default function DataKantin() {
   };
 
   useEffect(() => {
-    fetchPedagang();
+    setTimeout(() => {
+      fetchPedagang();
+    }, 0);
   }, []);
 
   if (loading && pedagangs.length === 0) {
@@ -67,6 +69,12 @@ export default function DataKantin() {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
         <div className="relative flex-1">
@@ -104,7 +112,7 @@ export default function DataKantin() {
               <tr key={pedagang.id} className="hover:bg-gray-50">
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                   <div className="flex items-center">
-                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center">
                       <Store className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div className="ml-4">

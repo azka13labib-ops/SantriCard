@@ -23,19 +23,19 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await api.get("/dashboard");
-      setData(response.data);
-    } catch (err) {
-      console.error("Gagal memuat data dashboard", err);
-      setError("Gagal memuat data dari server.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await api.get("/dashboard");
+        setData(response.data);
+      } catch (err) {
+        console.error("Gagal memuat data dashboard", err);
+        setError("Gagal memuat data dari server.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchDashboardData();
   }, []);
 

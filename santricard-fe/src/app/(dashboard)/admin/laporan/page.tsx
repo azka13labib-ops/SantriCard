@@ -32,7 +32,9 @@ export default function DataLaporan() {
   };
 
   useEffect(() => {
-    fetchSettlement();
+    setTimeout(() => {
+      fetchSettlement();
+    }, 0);
   }, []);
 
   if (loading && settlements.length === 0) {
