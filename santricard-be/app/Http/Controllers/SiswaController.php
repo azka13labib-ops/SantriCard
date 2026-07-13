@@ -57,13 +57,13 @@ class SiswaController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(string $id)
     {
         $siswa = Siswa::with('ortu', 'kartu')->findOrFail($id);
         return response()->json($siswa);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id)
     {
         $siswa = Siswa::findOrFail($id);
         
@@ -78,7 +78,7 @@ class SiswaController extends Controller
         return response()->json(['message' => 'Siswa berhasil diupdate', 'data' => $siswa]);
     }
 
-    public function destroy($id)
+    public function destroy(string $id)
     {
         $siswa = Siswa::findOrFail($id);
         $siswa->update(['aktif' => false]);
@@ -90,7 +90,7 @@ class SiswaController extends Controller
         return response()->json(['message' => 'Siswa berhasil dinonaktifkan']);
     }
 
-    public function saldo($id)
+    public function saldo(string $id)
     {
         $siswa = Siswa::findOrFail($id);
         
@@ -103,7 +103,7 @@ class SiswaController extends Controller
         ]);
     }
 
-    public function histori($id)
+    public function histori(string $id)
     {
         $siswa = Siswa::findOrFail($id);
         

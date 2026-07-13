@@ -22,16 +22,18 @@ class SettlementController extends Controller
             'catatan' => 'nullable|string'
         ]);
 
-        $pedagang = Pedagang::findOrFail($request->pedagang_id);
-        
-        if ($pedagang->saldo_mengendap <= 0) {
-            return response()->json(['message' => 'Tidak ada saldo yang bisa dicairkan'], 400);
-        }
-
-        $nominalDicairkan = $pedagang->saldo_mengendap;
-
         DB::beginTransaction();
         try {
+            // Lock pedagang record
+            $pedagang = Pedagang::where('id', $request->pedagang_id)->lockForUpdate()->firstOrFail();
+            
+            if ($pedagang->saldo_mengendap <= 0) {
+                DB::rollBack();
+                return response()->json(['message' => 'Tidak ada saldo yang bisa dicairkan'], 400);
+            }
+
+            $nominalDicairkan = $pedagang->saldo_mengendap;
+
             // Catat settlement
             $settlement = Settlement::create([
                 'pedagang_id' => $pedagang->id,
@@ -56,7 +58,7 @@ class SettlementController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(string $id)
     {
         $settlement = Settlement::with('pedagang:id,nama_kantin')->findOrFail($id);
         return response()->json($settlement);

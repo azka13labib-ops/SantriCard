@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class TopupController extends Controller
 {
-    public function store(Request $request, $siswa_id)
+    public function store(Request $request, string $siswa_id)
     {
         $request->validate([
             'nominal' => 'required|numeric|min:1',
@@ -17,10 +17,11 @@ class TopupController extends Controller
             'catatan' => 'nullable|string'
         ]);
 
-        $siswa = Siswa::findOrFail($siswa_id);
-
         DB::beginTransaction();
         try {
+            // Lock siswa record
+            $siswa = Siswa::where('id', $siswa_id)->lockForUpdate()->firstOrFail();
+
             // Tambah saldo
             $siswa->saldo_virtual += $request->nominal;
             $siswa->save();

@@ -54,13 +54,13 @@ class PedagangController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(string $id)
     {
         $pedagang = Pedagang::with('user:id,name,email')->findOrFail($id);
         return response()->json($pedagang);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id)
     {
         $pedagang = Pedagang::findOrFail($id);
         
@@ -74,7 +74,7 @@ class PedagangController extends Controller
         return response()->json(['message' => 'Profil kantin berhasil diupdate', 'data' => $pedagang]);
     }
 
-    public function penjualan($id)
+    public function penjualan(string $id)
     {
         $pedagang = Pedagang::findOrFail($id);
         

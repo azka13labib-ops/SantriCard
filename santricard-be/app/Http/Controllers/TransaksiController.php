@@ -3,17 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Kartu;
+use App\Models\Siswa;
+use App\Models\Pedagang;
+use App\Models\Transaksi;
 
 class TransaksiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -21,51 +18,59 @@ class TransaksiController extends Controller
             'nominal' => 'required|numeric|min:1',
         ]);
 
-        $pedagang = $request->user()->pedagang;
-        if (!$pedagang) {
+        $pedagangId = $request->user()->pedagang->id ?? null;
+        if (!$pedagangId) {
             return response()->json(['message' => 'Anda bukan pedagang'], 403);
         }
 
-        // Cari kartu
-        $kartu = \App\Models\Kartu::where('uid_rfid', $request->kode_kartu)
-            ->orWhere('qr_code_hash', $request->kode_kartu)
-            ->first();
-
-        if (!$kartu || !$kartu->status_aktif) {
-            return response()->json([
-                'status' => 'ditolak',
-                'alasan' => 'Kartu tidak valid atau tidak aktif'
-            ], 400);
-        }
-
-        $siswa = $kartu->siswa;
-
-        if (!$siswa->aktif) {
-            return response()->json([
-                'status' => 'ditolak',
-                'alasan' => 'Siswa tidak aktif'
-            ], 400);
-        }
-
-        if ($siswa->saldo_virtual < $request->nominal) {
-            return response()->json([
-                'status' => 'ditolak',
-                'alasan' => 'Saldo tidak cukup',
-                'sisa_saldo' => $siswa->saldo_virtual
-            ], 400);
-        }
-
-        if ($siswa->sisa_limit_hari_ini < $request->nominal) {
-            return response()->json([
-                'status' => 'ditolak',
-                'alasan' => 'Limit harian habis atau tidak mencukupi',
-                'sisa_limit' => $siswa->sisa_limit_hari_ini,
-                'nominal_diminta' => $request->nominal
-            ], 400);
-        }
-
-        \Illuminate\Support\Facades\DB::beginTransaction();
+        DB::beginTransaction();
         try {
+            // Lock pedagang record
+            $pedagang = Pedagang::where('id', $pedagangId)->lockForUpdate()->first();
+
+            // Cari kartu
+            $kartu = Kartu::where('uid_rfid', $request->kode_kartu)
+                ->orWhere('qr_code_hash', $request->kode_kartu)
+                ->first();
+
+            if (!$kartu || !$kartu->status_aktif) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'ditolak',
+                    'alasan' => 'Kartu tidak valid atau tidak aktif'
+                ], 400);
+            }
+
+            // Lock siswa record
+            $siswa = Siswa::where('id', $kartu->siswa_id)->lockForUpdate()->first();
+
+            if (!$siswa || !$siswa->aktif) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'ditolak',
+                    'alasan' => 'Siswa tidak aktif'
+                ], 400);
+            }
+
+            if ($siswa->saldo_virtual < $request->nominal) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'ditolak',
+                    'alasan' => 'Saldo tidak cukup',
+                    'sisa_saldo' => $siswa->saldo_virtual
+                ], 400);
+            }
+
+            if ($siswa->sisa_limit_hari_ini < $request->nominal) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'ditolak',
+                    'alasan' => 'Limit harian habis atau tidak mencukupi',
+                    'sisa_limit' => $siswa->sisa_limit_hari_ini,
+                    'nominal_diminta' => $request->nominal
+                ], 400);
+            }
+
             // Potong saldo siswa
             $siswa->saldo_virtual -= $request->nominal;
             $siswa->save();
@@ -75,14 +80,14 @@ class TransaksiController extends Controller
             $pedagang->save();
 
             // Catat transaksi
-            $transaksi = \App\Models\Transaksi::create([
+            $transaksi = Transaksi::create([
                 'siswa_id' => $siswa->id,
                 'pedagang_id' => $pedagang->id,
                 'nominal' => $request->nominal,
                 'status' => 'berhasil'
             ]);
 
-            \Illuminate\Support\Facades\DB::commit();
+            DB::commit();
 
             return response()->json([
                 'status' => 'berhasil',
@@ -94,35 +99,11 @@ class TransaksiController extends Controller
                 'pedagang' => $pedagang->nama_kantin
             ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
+            DB::rollBack();
             return response()->json([
                 'status' => 'gagal',
                 'alasan' => 'Terjadi kesalahan sistem'
             ], 500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
