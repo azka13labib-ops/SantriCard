@@ -1,5 +1,7 @@
 import LogoutButton from "@/components/ui/LogoutButton";
 
+export const dynamic = 'force-dynamic';
+
 export default function OrtuDashboard() {
   return (
     <div className="p-8">

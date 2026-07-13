@@ -21,26 +21,21 @@ export default function Login() {
     setError("");
 
     try {
-      // Panggil API Laravel
       const response = await api.post("/auth/login", { email, password });
       const { token, user } = response.data;
 
-      // Simpan token di Cookie. 
-      // Jika rememberMe dicentang, token awet 7 hari.
-      // Jika TIDAK dicentang, ini jadi Session Cookie (Otomatis hilang saat browser/tab ditutup sepenuhnya)
       const cookieOptions = rememberMe ? { expires: 7 } : {};
       Cookies.set("token", token, cookieOptions);
       Cookies.set("user_role", user.role, cookieOptions);
 
-      // Redirect berdasarkan role
       if (user.role === "admin") {
-        router.push("/admin");
+        router.replace("/admin");
       } else if (user.role === "pedagang") {
-        router.push("/pedagang");
+        router.replace("/pedagang");
       } else if (user.role === "ortu") {
-        router.push("/ortu");
+        router.replace("/ortu");
       } else {
-        router.push("/");
+        router.replace("/");
       }
     } catch (err: any) {
       if (err.response?.status === 422) {
