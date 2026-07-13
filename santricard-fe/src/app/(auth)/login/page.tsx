@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Cookies from "js-cookie";
 import { Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import axios from "axios";
 import api from "@/lib/axios";
 
 export default function Login() {
@@ -37,13 +38,17 @@ export default function Login() {
       } else {
         router.replace("/");
       }
-    } catch (err: any) {
-      if (err.response?.status === 422) {
-        setError(err.response.data.message || "Validasi gagal. Cek email dan password Anda.");
-      } else if (err.response?.status === 401) {
-        setError("Email atau Password salah!");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 422) {
+          setError(error.response.data.message || "Validasi gagal. Cek email dan password Anda.");
+        } else if (error.response?.status === 401) {
+          setError("Email atau Password salah!");
+        } else {
+          setError("Terjadi kesalahan sistem. Silakan coba lagi nanti.");
+        }
       } else {
-        setError("Terjadi kesalahan sistem. Silakan coba lagi nanti.");
+        setError("Terjadi kesalahan tidak terduga.");
       }
     } finally {
       setLoading(false);
