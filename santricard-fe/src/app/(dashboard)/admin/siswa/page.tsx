@@ -5,6 +5,7 @@ import { Plus, Search, Loader2, Edit, Trash2 } from "lucide-react";
 import api from "@/lib/axios";
 
 import AddSiswaModal from "@/components/ui/AddSiswaModal";
+import EditSiswaModal from "@/components/ui/EditSiswaModal";
 
 interface Siswa {
   id: number;
@@ -22,6 +23,8 @@ export default function DataSiswa() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedSiswa, setSelectedSiswa] = useState<Siswa | null>(null);
 
   const fetchSiswa = async () => {
     try {
@@ -151,7 +154,14 @@ export default function DataSiswa() {
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                         <div className="flex justify-end gap-3">
-                          <button className="text-indigo-600 hover:text-indigo-900" title="Edit">
+                          <button 
+                            onClick={() => {
+                              setSelectedSiswa(siswa);
+                              setIsEditModalOpen(true);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900" 
+                            title="Edit"
+                          >
                             <Edit className="h-5 w-5" />
                           </button>
                           <button 
@@ -181,6 +191,15 @@ export default function DataSiswa() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSiswaAdded={fetchSiswa} 
+      />
+      <EditSiswaModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedSiswa(null);
+        }} 
+        onSiswaUpdated={fetchSiswa}
+        siswaData={selectedSiswa}
       />
     </div>
   );
