@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, WalletCards } from "lucide-react";
 
 export default function SidebarOrtu() {
   const pathname = usePathname();
 
   const menuItems = [
     { name: "Monitoring Anak", icon: LayoutDashboard, href: "/ortu" },
+    { name: "Isi Saldo", icon: WalletCards, href: "/ortu/topup" },
   ];
 
   return (

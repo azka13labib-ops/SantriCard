@@ -29,8 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/siswa/{id}', [SiswaController::class, 'update']);
         Route::delete('/siswa/{id}', [SiswaController::class, 'destroy']);
         
-        // Topup
-        Route::post('/siswa/{id}/topup', [TopupController::class, 'store']);
+        // Topup Admin Verification
+        Route::get('/topup', [TopupController::class, 'index']);
+        Route::post('/topup/{id}/verifikasi', [TopupController::class, 'verifikasi']);
         
         // Pedagang
         Route::get('/pedagang', [PedagangController::class, 'index']);
@@ -54,6 +55,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/siswa/{id}', [SiswaController::class, 'show']);
         Route::get('/siswa/{id}/saldo', [SiswaController::class, 'saldo']);
         Route::get('/siswa/{id}/histori', [SiswaController::class, 'histori']);
+        
+        // Topup
+        Route::post('/siswa/{id}/topup', [TopupController::class, 'store']);
+        Route::get('/siswa/{id}/topup', [TopupController::class, 'history']); // For checking topup status
     });
 
     // Pedagang & Admin Routes

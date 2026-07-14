@@ -11,6 +11,7 @@ export default function Sidebar() {
     { name: "Dashboard", icon: LayoutDashboard, href: "/admin" },
     { name: "Data Siswa", icon: Users, href: "/admin/siswa" },
     { name: "Data Kantin", icon: Store, href: "/admin/pedagang" },
+    { name: "Verifikasi Top-Up", icon: ReceiptText, href: "/admin/topup" },
     { name: "Transaksi", icon: ReceiptText, href: "/admin/transaksi" },
     { name: "Laporan", icon: FileText, href: "/admin/laporan" },
   ];
