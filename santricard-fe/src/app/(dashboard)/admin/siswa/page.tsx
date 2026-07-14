@@ -6,6 +6,7 @@ import api from "@/lib/axios";
 
 import AddSiswaModal from "@/components/ui/AddSiswaModal";
 import EditSiswaModal from "@/components/ui/EditSiswaModal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Siswa {
   id: number;
@@ -25,6 +26,8 @@ export default function DataSiswa() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedSiswa, setSelectedSiswa] = useState<Siswa | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [siswaToDelete, setSiswaToDelete] = useState<number | null>(null);
 
   const fetchSiswa = async () => {
     try {
@@ -45,15 +48,16 @@ export default function DataSiswa() {
     }, 0);
   }, []);
 
-  const handleNonaktifkan = async (id: number) => {
-    if (confirm("Apakah Anda yakin ingin menonaktifkan siswa ini?")) {
-      try {
-        await api.delete(`/siswa/${id}`);
-        fetchSiswa();
-      } catch (err) {
-        console.error(err);
-        alert("Gagal menonaktifkan siswa.");
-      }
+  const handleNonaktifkan = async () => {
+    if (!siswaToDelete) return;
+    try {
+      await api.delete(`/siswa/${siswaToDelete}`);
+      fetchSiswa();
+      setIsDeleteModalOpen(false);
+      setSiswaToDelete(null);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menonaktifkan siswa.");
     }
   };
 
@@ -165,7 +169,10 @@ export default function DataSiswa() {
                             <Edit className="h-5 w-5" />
                           </button>
                           <button 
-                            onClick={() => handleNonaktifkan(siswa.id)}
+                            onClick={() => {
+                              setSiswaToDelete(siswa.id);
+                              setIsDeleteModalOpen(true);
+                            }}
                             className="text-red-600 hover:text-red-900" 
                             title="Nonaktifkan"
                           >
@@ -200,6 +207,18 @@ export default function DataSiswa() {
         }} 
         onSiswaUpdated={fetchSiswa}
         siswaData={selectedSiswa}
+      />
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSiswaToDelete(null);
+        }}
+        onConfirm={handleNonaktifkan}
+        title="Konfirmasi Hapus"
+        message="Apakah Anda yakin ingin menonaktifkan akun siswa ini? Aksi ini akan memutuskan koneksi RFID."
+        confirmText="Ya, Hapus"
+        type="danger"
       />
     </div>
   );

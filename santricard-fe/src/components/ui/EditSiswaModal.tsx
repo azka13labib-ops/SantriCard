@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
+import ConfirmModal from "./ConfirmModal";
 
 interface Siswa {
   id: number;
@@ -26,6 +27,7 @@ export default function EditSiswaModal({ isOpen, onClose, onSiswaUpdated, siswaD
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (siswaData && isOpen) {
@@ -42,8 +44,12 @@ export default function EditSiswaModal({ isOpen, onClose, onSiswaUpdated, siswaD
 
   if (!isOpen || !siswaData) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitClick = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmSubmit = async () => {
     setLoading(true);
     setError("");
 
@@ -52,6 +58,7 @@ export default function EditSiswaModal({ isOpen, onClose, onSiswaUpdated, siswaD
         ...formData,
         limit_harian: Number(formData.limit_harian)
       });
+      setIsConfirmOpen(false);
       onSiswaUpdated();
       onClose();
     } catch (error: unknown) {
@@ -82,7 +89,7 @@ export default function EditSiswaModal({ isOpen, onClose, onSiswaUpdated, siswaD
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <form onSubmit={handleSubmitClick} className="mt-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">NIS (Tidak dapat diubah)</label>
             <input
@@ -150,6 +157,17 @@ export default function EditSiswaModal({ isOpen, onClose, onSiswaUpdated, siswaD
           </div>
         </form>
       </div>
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Konfirmasi Perubahan"
+        message="Apakah Anda yakin ingin menyimpan perubahan data siswa ini?"
+        confirmText="Ya, Simpan"
+        type="warning"
+        isLoading={loading}
+      />
     </div>
   );
 }

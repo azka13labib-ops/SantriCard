@@ -7,6 +7,7 @@ import api from "@/lib/axios";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import SidebarPedagang from "@/components/ui/SidebarPedagang";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface UserData {
   name: string;
@@ -18,19 +19,26 @@ interface UserData {
 export default function PedagangLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     api.get("/user").then(res => setUser(res.data)).catch(console.error);
   }, []);
 
   const handleLogout = async () => {
+    setLoading(true);
     try {
       await api.post("/auth/logout");
       Cookies.remove("token");
       window.location.href = "/login";
-    } catch (err) {
+    } catch (error) {
+      console.error("Gagal logout di backend", error);
+    } finally {
       Cookies.remove("token");
-      window.location.href = "/login";
+      Cookies.remove("user_role");
+      window.location.replace("/login");
+      setLoading(false);
     }
   };
 
@@ -58,7 +66,7 @@ export default function PedagangLayout({ children }: { children: React.ReactNode
                <UserCircle className="w-5 h-5 text-emerald-600" />
             </div>
             <button
-              onClick={handleLogout}
+              onClick={() => setIsLogoutModalOpen(true)}
               className="ml-2 rounded-lg p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
               title="Logout"
             >
@@ -78,7 +86,7 @@ export default function PedagangLayout({ children }: { children: React.ReactNode
             </p>
           </div>
           <button 
-            onClick={handleLogout}
+            onClick={() => setIsLogoutModalOpen(true)}
             className="p-2 rounded-full bg-emerald-700 hover:bg-emerald-800 transition-colors"
             title="Keluar"
           >
@@ -90,6 +98,17 @@ export default function PedagangLayout({ children }: { children: React.ReactNode
         <main className="flex-1 w-full max-w-md md:max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
           {children}
         </main>
+        
+        <ConfirmModal
+          isOpen={isLogoutModalOpen}
+          onClose={() => setIsLogoutModalOpen(false)}
+          onConfirm={handleLogout}
+          title="Konfirmasi Keluar"
+          message="Apakah Anda yakin ingin keluar dari aplikasi?"
+          confirmText="Ya, Keluar"
+          type="danger"
+          isLoading={loading}
+        />
       </div>
 
       {/* Mobile Bottom Navigation */}
