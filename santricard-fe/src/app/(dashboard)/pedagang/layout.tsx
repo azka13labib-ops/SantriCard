@@ -64,12 +64,12 @@ export default function PedagangLayout({ children }: { children: React.ReactNode
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 w-full p-5 overflow-y-auto pb-24 custom-scrollbar">
+        <main className="flex-1 w-full p-5 overflow-y-auto custom-scrollbar">
           {children}
         </main>
 
         {/* Bottom Navigation */}
-        <nav className="absolute bottom-0 w-full bg-white border-t border-gray-100 flex shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] z-20 pb-safe">
+        <nav className="mt-auto shrink-0 w-full bg-white border-t border-gray-100 flex shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] z-20">
           <div className="w-full flex justify-around px-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;

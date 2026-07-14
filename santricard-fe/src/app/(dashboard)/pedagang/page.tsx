@@ -123,7 +123,7 @@ export default function PedagangScannerPage() {
           type="text"
           placeholder="0"
           disabled={isScanning || isProcessing}
-          className="w-full text-4xl font-bold text-gray-900 bg-transparent border-0 border-b-2 border-emerald-200 focus:ring-0 focus:border-emerald-600 px-0 py-2 disabled:opacity-50 transition-colors"
+          className="w-full text-4xl font-bold text-gray-900 bg-transparent border-transparent border-b-emerald-200 focus:border-transparent focus:border-b-emerald-600 focus:ring-0 px-0 py-2 disabled:opacity-50 transition-colors shadow-none"
           value={nominal}
           onChange={(e) => {
             const val = e.target.value.replace(/\D/g, "");
