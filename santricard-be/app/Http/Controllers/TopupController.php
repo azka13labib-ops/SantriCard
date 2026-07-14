@@ -31,7 +31,7 @@ class TopupController extends Controller
             'nominal' => 'required|numeric|min:1',
             'metode' => 'required|string',
             'catatan' => 'nullable|string',
-            'bukti_transfer' => 'nullable|image|max:2048' // max 2MB
+            'bukti_transfer' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120' // max 5MB
         ]);
 
         $user = $request->user();

@@ -68,6 +68,12 @@ export default function OrtuTopupPage() {
       setMessage({ type: "error", text: "Mohon unggah bukti transfer/pembayaran." });
       return;
     }
+    
+    if (!file.type.startsWith("image/")) {
+      setMessage({ type: "error", text: "File yang diunggah harus berupa gambar (JPG, PNG, dll)." });
+      setFile(null);
+      return;
+    }
 
     const numNominal = Number(nominal.replace(/\D/g, ""));
     if (numNominal < 10000) {
