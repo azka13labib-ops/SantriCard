@@ -13,11 +13,11 @@ export default function SidebarOrtu() {
   ];
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sky-950 text-white shadow-xl transition-transform duration-300 ease-in-out md:translate-x-0">
+    <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col bg-emerald-950 text-white shadow-xl transition-transform duration-300 ease-in-out md:flex md:translate-x-0">
       {/* Logo Area */}
-      <div className="flex h-16 shrink-0 items-center border-b border-sky-800/50 px-6">
+      <div className="flex h-16 shrink-0 items-center border-b border-emerald-800/50 px-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500 text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white">
             <span className="font-bold">S</span>
           </div>
           <span className="text-xl font-bold tracking-tight text-white">SantriCard</span>
@@ -36,13 +36,13 @@ export default function SidebarOrtu() {
               href={item.href}
               className={`group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-sky-800/80 text-sky-100"
-                  : "text-sky-300 hover:bg-sky-800/50 hover:text-white"
+                  ? "bg-emerald-800/80 text-emerald-100"
+                  : "text-emerald-300 hover:bg-emerald-800/50 hover:text-white"
               }`}
             >
               <Icon
                 className={`mr-3 h-5 w-5 shrink-0 transition-colors ${
-                  isActive ? "text-sky-100" : "text-sky-400 group-hover:text-white"
+                  isActive ? "text-emerald-100" : "text-emerald-400 group-hover:text-white"
                 }`}
               />
               {item.name}
@@ -52,9 +52,9 @@ export default function SidebarOrtu() {
       </nav>
 
       {/* Bottom Area (e.g. settings or help) */}
-      <div className="border-t border-sky-800/50 p-4">
-        <div className="rounded-lg bg-sky-900/50 p-4 text-center">
-          <p className="text-xs text-sky-300">
+      <div className="border-t border-emerald-800/50 p-4">
+        <div className="rounded-lg bg-emerald-900/50 p-4 text-center">
+          <p className="text-xs text-emerald-300">
             Panel Pemantauan <br /> Orang Tua
           </p>
         </div>

@@ -29,9 +29,7 @@ export default function DashboardOrtu() {
   const [histori, setHistori] = useState<Transaksi[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+
 
   const fetchData = async () => {
     try {
@@ -52,6 +50,10 @@ export default function DashboardOrtu() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -81,54 +83,57 @@ export default function DashboardOrtu() {
   const limitPercentage = Math.min(100, Math.max(0, (siswa.sisa_limit_hari_ini / siswa.limit_harian) * 100));
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-12 md:gap-6 animate-in fade-in duration-300">
       
-      {/* Saldo Card */}
-      <div className="bg-emerald-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <Wallet className="w-32 h-32" />
+      {/* Left Column: Cards */}
+      <div className="md:col-span-5 lg:col-span-4 space-y-6">
+        {/* Saldo Card */}
+        <div className="bg-emerald-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10">
+            <Wallet className="w-32 h-32" />
+          </div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-emerald-100 font-medium text-xs">Sisa Saldo Ananda</p>
+                <h2 className="text-sm font-semibold">{siswa.nama}</h2>
+              </div>
+              <div className="bg-emerald-700/50 rounded-full px-2 py-1 text-[10px] uppercase tracking-wider font-semibold border border-emerald-500/30">
+                KLS {siswa.kelas}
+              </div>
+            </div>
+            
+            <h2 className="text-4xl font-bold mt-4 mb-1">
+              {formatRupiah(siswa.saldo_virtual)}
+            </h2>
+          </div>
         </div>
-        <div className="relative z-10">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-emerald-100 font-medium text-xs">Sisa Saldo Ananda</p>
-              <h2 className="text-sm font-semibold">{siswa.nama}</h2>
-            </div>
-            <div className="bg-emerald-700/50 rounded-full px-2 py-1 text-[10px] uppercase tracking-wider font-semibold border border-emerald-500/30">
-              KLS {siswa.kelas}
-            </div>
+
+        {/* Limit Harian Card */}
+        <div className="bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-semibold text-gray-800 text-sm">Batas Jajan Hari Ini</h3>
+            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Reset Tiap Malam</span>
           </div>
           
-          <h2 className="text-4xl font-bold mt-4 mb-1">
-            {formatRupiah(siswa.saldo_virtual)}
-          </h2>
+          <div className="flex justify-between items-end mb-2">
+            <span className="text-2xl font-bold text-gray-900">{formatRupiah(siswa.sisa_limit_hari_ini)}</span>
+          </div>
+          
+          <div className="w-full bg-gray-100 rounded-full h-2.5 mb-1 overflow-hidden">
+            <div 
+              className="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-out" 
+              style={{ width: `${limitPercentage}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-500">
+            Dari total jatah {formatRupiah(siswa.limit_harian)} / hari
+          </p>
         </div>
       </div>
 
-      {/* Limit Harian Card */}
-      <div className="bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm relative overflow-hidden">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold text-gray-800 text-sm">Batas Jajan Hari Ini</h3>
-          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Reset Tiap Malam</span>
-        </div>
-        
-        <div className="flex justify-between items-end mb-2">
-          <span className="text-2xl font-bold text-gray-900">{formatRupiah(siswa.sisa_limit_hari_ini)}</span>
-        </div>
-        
-        <div className="w-full bg-gray-100 rounded-full h-2.5 mb-1 overflow-hidden">
-          <div 
-            className="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-out" 
-            style={{ width: `${limitPercentage}%` }}
-          ></div>
-        </div>
-        <p className="text-xs text-gray-500">
-          Dari total jatah {formatRupiah(siswa.limit_harian)} / hari
-        </p>
-      </div>
-
-      {/* Histori List */}
-      <div>
+      {/* Right Column: Histori List */}
+      <div className="md:col-span-7 lg:col-span-8">
         <div className="flex items-center gap-2 mb-3">
           <History className="w-5 h-5 text-emerald-600" />
           <h3 className="font-bold text-gray-900 text-lg">Riwayat Jajan Terakhir</h3>

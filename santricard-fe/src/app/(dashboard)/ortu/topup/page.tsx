@@ -48,10 +48,10 @@ export default function OrtuTopupPage() {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      fetchData();
-    }, 0);
+    fetchData();
   }, []);
+
+
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -123,10 +123,10 @@ export default function OrtuTopupPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-12 md:gap-6 animate-in fade-in duration-300">
       
-      {/* Form Isi Saldo */}
-      <div className="rounded-3xl border border-emerald-100 bg-white shadow-sm p-5">
+      {/* Left Column: Form Isi Saldo */}
+      <div className="md:col-span-6 lg:col-span-5 rounded-3xl border border-emerald-100 bg-white shadow-sm p-5">
         <div className="flex items-center gap-2 mb-4">
           <div className="bg-emerald-100 p-2 rounded-xl">
             <QrCode className="h-5 w-5 text-emerald-600" />
@@ -201,8 +201,8 @@ export default function OrtuTopupPage() {
         </form>
       </div>
 
-      {/* Histori Topup */}
-      <div>
+      {/* Right Column: Histori Topup */}
+      <div className="md:col-span-6 lg:col-span-7">
         <h2 className="text-lg font-bold text-gray-900 mb-3 px-1">Riwayat Pengajuan</h2>
         <div className="space-y-3 pb-8">
           {history.length === 0 ? (
