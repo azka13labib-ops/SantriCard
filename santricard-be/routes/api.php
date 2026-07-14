@@ -23,6 +23,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin Routes
     Route::middleware('role:admin')->group(function () {
+        // Daftar Ortu untuk form tambah siswa
+        Route::get('/users/ortu', function () {
+            return \App\Models\User::where('role', 'ortu')->get(['id', 'name', 'email']);
+        });
+
         // Siswa
         Route::get('/siswa', [SiswaController::class, 'index']);
         Route::post('/siswa', [SiswaController::class, 'store']);

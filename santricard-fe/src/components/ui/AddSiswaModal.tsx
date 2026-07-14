@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
@@ -9,10 +9,27 @@ export default function AddSiswaModal({ isOpen, onClose, onSiswaAdded }: { isOpe
     nama: "",
     kelas: "",
     limit_harian: "",
-    ortu_id: "2" // Hardcoded untuk prototype. Aslinya harus ambil dari dropdown daftar Ortu.
+    ortu_id: "" 
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [ortuList, setOrtuList] = useState<{id: number, name: string, email: string}[]>([]);
+  const [loadingOrtu, setLoadingOrtu] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setLoadingOrtu(true);
+      api.get('/users/ortu')
+        .then(res => {
+          setOrtuList(res.data);
+          if (res.data.length > 0 && !formData.ortu_id) {
+            setFormData(prev => ({ ...prev, ortu_id: res.data[0].id.toString() }));
+          }
+        })
+        .catch(err => console.error("Gagal memuat data orang tua", err))
+        .finally(() => setLoadingOrtu(false));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -57,6 +74,30 @@ export default function AddSiswaModal({ isOpen, onClose, onSiswaAdded }: { isOpe
         )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Pilih Orang Tua / Wali</label>
+            <select
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border bg-white"
+              value={formData.ortu_id}
+              onChange={(e) => setFormData({ ...formData, ortu_id: e.target.value })}
+              disabled={loadingOrtu}
+            >
+              {loadingOrtu ? (
+                <option value="">Memuat data...</option>
+              ) : (
+                ortuList.map(ortu => (
+                  <option key={ortu.id} value={ortu.id}>
+                    {ortu.name} ({ortu.email})
+                  </option>
+                ))
+              )}
+            </select>
+            {ortuList.length === 0 && !loadingOrtu && (
+              <p className="mt-1 text-xs text-red-500">Tidak ada akun orang tua yang tersedia. Harap buat akun orang tua terlebih dahulu.</p>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Nomor Induk Santri (NIS)</label>
             <input
