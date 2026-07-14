@@ -13,12 +13,7 @@ export default function PedagangScannerPage() {
   
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
-  // Stop scanner on unmount
-  useEffect(() => {
-    return () => {
-      stopScanner();
-    };
-  }, []);
+
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -38,19 +33,22 @@ export default function PedagangScannerPage() {
     setIsScanning(true);
     setStatusMsg(null);
     
-    try {
-      scannerRef.current = new Html5Qrcode("reader");
-      await scannerRef.current.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        onScanSuccess,
-        onScanFailure
-      );
-    } catch (err) {
-      console.error(err);
-      setIsScanning(false);
-      setStatusMsg({ type: 'error', title: 'Kamera Gagal', text: 'Kamera tidak dapat diakses atau tidak ada izin.'});
-    }
+    // Tunggu DOM selesai dirender sebelum inisialisasi Html5Qrcode
+    setTimeout(async () => {
+      try {
+        scannerRef.current = new Html5Qrcode("reader");
+        await scannerRef.current.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          onScanSuccess,
+          onScanFailure
+        );
+      } catch (err) {
+        console.error(err);
+        setIsScanning(false);
+        setStatusMsg({ type: 'error', title: 'Kamera Gagal', text: 'Kamera tidak dapat diakses atau tidak ada izin.'});
+      }
+    }, 100);
   };
 
   const stopScanner = async () => {
@@ -64,6 +62,13 @@ export default function PedagangScannerPage() {
     }
     setIsScanning(false);
   };
+
+  // Stop scanner on unmount
+  useEffect(() => {
+    return () => {
+      stopScanner();
+    };
+  }, []);
 
   const onScanSuccess = async (decodedText: string) => {
     // Prevent multiple scans
