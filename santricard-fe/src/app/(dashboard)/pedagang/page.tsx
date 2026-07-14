@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { CreditCard, QrCode, Zap, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import axios from "axios";
 import api from "@/lib/axios";
 
 export default function PedagangScannerPage() {
@@ -93,19 +94,27 @@ export default function PedagangScannerPage() {
         text: `Transaksi sejumlah ${formatRupiah(numNominal)} untuk ${res.data.siswa} berhasil.`
       });
       setNominal(""); // Reset nominal for next trx
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setStatusMsg({ 
-        type: 'error', 
-        title: 'Transaksi Gagal', 
-        text: err.response?.data?.alasan || "Terjadi kesalahan pada sistem."
-      });
+      if (axios.isAxiosError(err)) {
+        setStatusMsg({ 
+          type: 'error', 
+          title: 'Transaksi Gagal', 
+          text: err.response?.data?.alasan || "Terjadi kesalahan pada sistem."
+        });
+      } else {
+        setStatusMsg({ 
+          type: 'error', 
+          title: 'Transaksi Gagal', 
+          text: "Terjadi kesalahan pada sistem."
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const onScanFailure = (error: any) => {
+  const onScanFailure = () => {
     // Just ignore, it happens every frame no QR is found
   };
 

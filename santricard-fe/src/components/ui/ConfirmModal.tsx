@@ -1,4 +1,4 @@
-import { X, Loader2, AlertTriangle, HelpCircle } from "lucide-react";
+import { Loader2, AlertTriangle, HelpCircle } from "lucide-react";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-200">
         <div className="flex flex-col items-center text-center">
           {type === "danger" && (

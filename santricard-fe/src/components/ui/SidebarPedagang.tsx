@@ -35,7 +35,7 @@ export default function SidebarPedagang() {
               }`}
             >
               <item.icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
+                className={`mr-3 h-5 w-5 shrink-0 transition-colors ${
                   isActive ? "text-white" : "text-emerald-300 group-hover:text-emerald-100"
                 }`}
               />
