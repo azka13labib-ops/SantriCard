@@ -24,7 +24,7 @@ class TransaksiController extends Controller
     {
         $request->validate([
             'kode_kartu' => 'required',
-            'nominal' => 'required|numeric|min:20000',
+            'nominal' => 'required|numeric|min:500|max:20000',
         ]);
 
         $pedagangId = $request->user()->pedagang->id ?? null;

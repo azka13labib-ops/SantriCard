@@ -25,8 +25,8 @@ export default function PedagangScannerPage() {
 
   const startScanner = async () => {
     const numNominal = Number(nominal.replace(/\D/g, ""));
-    if (numNominal < 20000) {
-      setStatusMsg({ type: 'error', title: 'Nominal Tidak Valid', text: 'Nominal minimal Rp 20.000.'});
+    if (numNominal < 500 || numNominal > 20000) {
+      setStatusMsg({ type: 'error', title: 'Nominal Tidak Valid', text: 'Nominal transaksi harus antara Rp 500 hingga Rp 20.000.'});
       return;
     }
 
