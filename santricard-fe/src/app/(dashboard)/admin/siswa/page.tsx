@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Loader2, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Loader2, Edit, Trash2, QrCode } from "lucide-react";
 import api from "@/lib/axios";
 
 import AddSiswaModal from "@/components/ui/AddSiswaModal";
 import EditSiswaModal from "@/components/ui/EditSiswaModal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import QRCodeModal from "@/components/ui/QRCodeModal";
 
 interface Siswa {
   id: number;
@@ -16,7 +17,7 @@ interface Siswa {
   saldo_virtual: number;
   limit_harian: number;
   aktif: boolean;
-  kartu: { status_aktif: boolean } | null;
+  kartu: { status_aktif: boolean; qr_code_hash: string } | null;
 }
 
 export default function DataSiswa() {
@@ -25,6 +26,7 @@ export default function DataSiswa() {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedSiswa, setSelectedSiswa] = useState<Siswa | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [siswaToDelete, setSiswaToDelete] = useState<number | null>(null);
@@ -161,6 +163,16 @@ export default function DataSiswa() {
                           <button 
                             onClick={() => {
                               setSelectedSiswa(siswa);
+                              setIsQrModalOpen(true);
+                            }}
+                            className="text-emerald-600 hover:text-emerald-900" 
+                            title="Lihat QR Code"
+                          >
+                            <QrCode className="h-5 w-5" />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setSelectedSiswa(siswa);
                               setIsEditModalOpen(true);
                             }}
                             className="text-indigo-600 hover:text-indigo-900" 
@@ -219,6 +231,14 @@ export default function DataSiswa() {
         message="Apakah Anda yakin ingin menonaktifkan akun siswa ini? Aksi ini akan memutuskan koneksi RFID."
         confirmText="Ya, Hapus"
         type="danger"
+      />
+      <QRCodeModal
+        isOpen={isQrModalOpen}
+        onClose={() => {
+          setIsQrModalOpen(false);
+          setSelectedSiswa(null);
+        }}
+        siswaData={selectedSiswa}
       />
     </div>
   );
