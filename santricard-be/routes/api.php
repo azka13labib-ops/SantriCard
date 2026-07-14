@@ -10,6 +10,7 @@ use App\Http\Controllers\TopupController;
 use App\Http\Controllers\PedagangController;
 use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrtuController;
 
 // Auth Routes (Public)
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -24,9 +25,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin Routes
     Route::middleware('role:admin')->group(function () {
         // Daftar Ortu untuk form tambah siswa
-        Route::get('/users/ortu', function () {
-            return \App\Models\User::where('role', 'ortu')->get(['id', 'name', 'email']);
-        });
+        Route::get('/users/ortu', [OrtuController::class, 'index']);
+        
+        // Manajemen Ortu
+        Route::get('/ortu', [OrtuController::class, 'index']);
+        Route::post('/ortu', [OrtuController::class, 'store']);
+        Route::patch('/ortu/{id}', [OrtuController::class, 'update']);
+        Route::delete('/ortu/{id}', [OrtuController::class, 'destroy']);
 
         // Siswa
         Route::get('/siswa', [SiswaController::class, 'index']);
