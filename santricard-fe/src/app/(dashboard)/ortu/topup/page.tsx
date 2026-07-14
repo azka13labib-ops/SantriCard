@@ -37,7 +37,6 @@ export default function OrtuTopupPage() {
         const currentSiswa = user.siswas[0];
         setSiswa(currentSiswa);
         
-        // Fetch topup history for this siswa
         const historyRes = await api.get(`/siswa/${currentSiswa.id}/topup`);
         setHistory(historyRes.data);
       }
@@ -90,10 +89,10 @@ export default function OrtuTopupPage() {
           "Content-Type": "multipart/form-data",
         },
       });
-      setMessage({ type: "success", text: "Berhasil! Bukti transfer telah dikirim dan menunggu verifikasi admin." });
+      setMessage({ type: "success", text: "Bukti terkirim! Menunggu verifikasi admin." });
       setNominal("");
       setFile(null);
-      fetchData(); // refresh history
+      fetchData();
     } catch (err: any) {
       console.error(err);
       setMessage({ type: "error", text: err.response?.data?.message || "Gagal mengirim pengajuan top-up." });
@@ -105,11 +104,11 @@ export default function OrtuTopupPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "berhasil":
-        return <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"><CheckCircle2 className="w-3 h-3"/> Berhasil</span>;
+        return <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-[10px] font-medium text-green-800 uppercase tracking-wider"><CheckCircle2 className="w-3 h-3"/> Berhasil</span>;
       case "pending":
-        return <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800"><Clock className="w-3 h-3"/> Menunggu</span>;
+        return <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-[10px] font-medium text-yellow-800 uppercase tracking-wider"><Clock className="w-3 h-3"/> Menunggu</span>;
       case "gagal":
-        return <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800"><XCircle className="w-3 h-3"/> Ditolak</span>;
+        return <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-medium text-red-800 uppercase tracking-wider"><XCircle className="w-3 h-3"/> Ditolak</span>;
       default:
         return null;
     }
@@ -118,126 +117,111 @@ export default function OrtuTopupPage() {
   if (loading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-gray-900">Isi Saldo (Top-Up)</h1>
-        {siswa && (
-          <p className="text-gray-500">
-            Kirimkan uang saku untuk <span className="font-semibold text-gray-700">{siswa.nama}</span> melalui QRIS DANA Bisnis.
-          </p>
-        )}
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Form Isi Saldo */}
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <QrCode className="h-5 w-5 text-sky-600" />
-            Langkah Pembayaran
-          </h2>
-          
-          <div className="mb-6 p-4 bg-sky-50 rounded-lg border border-sky-100 text-sm text-sky-800">
-            <ol className="list-decimal pl-5 space-y-1">
-              <li>Scan kode QRIS di bawah ini menggunakan aplikasi M-Banking atau E-Wallet Anda (DANA, OVO, Gopay, dll).</li>
-              <li>Masukkan nominal yang diinginkan.</li>
-              <li>Screenshot/simpan bukti transfer berhasil.</li>
-              <li>Upload bukti tersebut pada form di bawah.</li>
-            </ol>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      
+      {/* Form Isi Saldo */}
+      <div className="rounded-3xl border border-emerald-100 bg-white shadow-sm p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="bg-emerald-100 p-2 rounded-xl">
+            <QrCode className="h-5 w-5 text-emerald-600" />
           </div>
-
-          <div className="mb-6 flex justify-center">
-            {/* TODO: Ganti src dengan gambar QRIS DANA Bisnis yang sebenarnya */}
-            <div className="p-4 bg-white border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center">
-               {/* Placeholder QRIS Image */}
-               <div className="w-48 h-48 bg-gray-100 flex items-center justify-center mb-2">
-                 <QrCode className="w-16 h-16 text-gray-400" />
-               </div>
-               <p className="text-xs text-gray-500 font-medium">QRIS DANA Bisnis Pesantren</p>
-            </div>
-          </div>
-
-          {message.text && (
-            <div className={`mb-4 p-3 rounded-md text-sm flex gap-2 items-start ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-              <AlertCircle className="h-5 w-5 shrink-0" />
-              <p>{message.text}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nominal Top-Up</label>
-              <div className="relative mt-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <span className="text-gray-500 sm:text-sm">Rp</span>
-                </div>
-                <input
-                  type="text"
-                  required
-                  placeholder="0"
-                  className="block w-full rounded-md border-gray-300 pl-9 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm border py-2 text-gray-900"
-                  value={nominal}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, "");
-                    setNominal(new Intl.NumberFormat("id-ID").format(Number(val)));
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Upload Bukti Transfer</label>
-              <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-sky-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-sky-500 focus-within:ring-offset-2 hover:text-sky-500">
-                      <span>Pilih file gambar</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-                    </label>
-                    <p className="pl-1">atau drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, JPEG (Max. 2MB)</p>
-                  {file && <p className="text-sm font-medium text-sky-600 mt-2">{file.name}</p>}
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:opacity-50"
-            >
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Kirim Bukti Pembayaran"}
-            </button>
-          </form>
+          <h2 className="text-lg font-bold text-gray-900">Pembayaran QRIS</h2>
+        </div>
+        
+        <div className="mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
+          <ol className="list-decimal pl-4 space-y-1.5">
+            <li>Scan QR di bawah pakai M-Banking / DANA.</li>
+            <li>Masukkan nominal bebas (Min. 10.000).</li>
+            <li>Screenshot bukti transfer berhasil.</li>
+            <li>Upload pada form di bawah.</li>
+          </ol>
         </div>
 
-        {/* Histori Topup */}
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Riwayat Pengajuan Top-Up</h2>
-          <div className="overflow-y-auto max-h-[600px] pr-2 space-y-3">
-            {history.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-8">Belum ada riwayat top-up.</p>
-            ) : (
-              history.map((item) => (
-                <div key={item.id} className="p-4 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">{formatRupiah(item.nominal)}</p>
-                    <p className="text-xs text-gray-500">{new Date(item.created_at).toLocaleString("id-ID")}</p>
-                  </div>
-                  <div>
-                    {getStatusBadge(item.status)}
-                  </div>
-                </div>
-              ))
-            )}
+        <div className="mb-6 flex justify-center">
+          <div className="p-4 bg-white border-2 border-dashed border-emerald-200 rounded-2xl flex flex-col items-center justify-center shadow-inner">
+             <div className="w-40 h-40 bg-gray-50 flex items-center justify-center mb-2 rounded-xl border border-gray-100">
+               <QrCode className="w-16 h-16 text-emerald-300" />
+             </div>
+             <p className="text-xs text-emerald-600 font-bold">QRIS DANA Bisnis</p>
           </div>
+        </div>
+
+        {message.text && (
+          <div className={`mb-5 p-3 rounded-xl text-sm flex gap-2 items-start ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            <AlertCircle className="h-5 w-5 shrink-0" />
+            <p>{message.text}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Nominal (Rp)</label>
+            <input
+              type="text"
+              required
+              placeholder="10.000"
+              className="block w-full rounded-xl border-gray-200 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 text-lg py-3 px-4 font-bold text-gray-900"
+              value={nominal}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "");
+                setNominal(new Intl.NumberFormat("id-ID").format(Number(val)));
+              }}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Upload Bukti (Max 2MB)</label>
+            <div className="mt-1 flex justify-center rounded-xl border-2 border-dashed border-gray-300 px-6 pt-5 pb-6 bg-gray-50 hover:bg-emerald-50 hover:border-emerald-300 transition-colors">
+              <div className="space-y-1 text-center">
+                <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                <div className="flex text-sm text-gray-600 justify-center">
+                  <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-emerald-600 hover:text-emerald-500">
+                    <span>Pilih Gambar</span>
+                    <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                  </label>
+                </div>
+                {file && <p className="text-xs font-bold text-emerald-600 mt-2 truncate w-48 mx-auto">{file.name}</p>}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 mt-2"
+          >
+            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Kirim Bukti Pembayaran"}
+          </button>
+        </form>
+      </div>
+
+      {/* Histori Topup */}
+      <div>
+        <h2 className="text-lg font-bold text-gray-900 mb-3 px-1">Riwayat Pengajuan</h2>
+        <div className="space-y-3 pb-8">
+          {history.length === 0 ? (
+            <div className="bg-white rounded-2xl p-6 text-center border border-gray-100">
+              <p className="text-sm text-gray-500">Belum ada riwayat top-up.</p>
+            </div>
+          ) : (
+            history.map((item) => (
+              <div key={item.id} className="p-4 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-gray-900 text-lg">{formatRupiah(item.nominal)}</p>
+                  <p className="text-xs text-gray-500 font-medium">{new Date(item.created_at).toLocaleString("id-ID", { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+                </div>
+                <div>
+                  {getStatusBadge(item.status)}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

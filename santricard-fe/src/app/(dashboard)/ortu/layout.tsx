@@ -1,22 +1,80 @@
-import SidebarOrtu from "@/components/ui/SidebarOrtu";
-import TopHeader from "@/components/ui/TopHeader";
+"use client";
 
-export default function OrtuLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, WalletCards, LogOut, UserCircle } from "lucide-react";
+import api from "@/lib/axios";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+
+export default function OrtuLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [user, setUser] = useState<{name: string} | null>(null);
+
+  useEffect(() => {
+    api.get("/user").then(res => setUser(res.data)).catch(console.error);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+      Cookies.remove("token");
+      window.location.href = "/login";
+    } catch (err) {
+      Cookies.remove("token");
+      window.location.href = "/login";
+    }
+  };
+
+  const navItems = [
+    { name: "Monitoring Anak", icon: LayoutDashboard, href: "/ortu" },
+    { name: "Isi Saldo", icon: WalletCards, href: "/ortu/topup" },
+  ];
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <SidebarOrtu />
-      <div className="flex flex-1 flex-col md:pl-64 transition-all duration-300">
-        <TopHeader />
-        <main className="flex-1">
-          <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-            {children}
-          </div>
-        </main>
-      </div>
+    <div className="flex flex-col min-h-screen bg-gray-50 pb-16">
+      {/* Top Header */}
+      <header className="bg-emerald-600 text-white shadow-md sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
+        <div>
+          <h1 className="font-bold text-lg leading-tight tracking-wide">SantriCard</h1>
+          <p className="text-emerald-100 text-xs flex items-center gap-1">
+            <UserCircle className="w-3 h-3" /> {user?.name || "Memuat..."}
+          </p>
+        </div>
+        <button 
+          onClick={handleLogout}
+          className="p-2 rounded-full bg-emerald-700 hover:bg-emerald-800 transition-colors"
+          title="Keluar"
+        >
+          <LogOut className="w-5 h-5 text-emerald-50" />
+        </button>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 w-full max-w-md mx-auto p-4">
+        {children}
+      </main>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 w-full bg-white border-t border-gray-200 flex shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
+        <div className="w-full max-w-md mx-auto flex justify-around">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link 
+                key={item.name} 
+                href={item.href}
+                className={`flex flex-col items-center justify-center w-full py-3 gap-1 transition-colors ${
+                  isActive ? "text-emerald-600" : "text-gray-400 hover:text-emerald-500"
+                }`}
+              >
+                <item.icon className={`w-6 h-6 ${isActive ? 'animate-pulse' : ''}`} />
+                <span className="text-[10px] font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

@@ -1,39 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Wallet, History, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, Wallet, History, AlertCircle, CheckCircle2 } from "lucide-react";
 import api from "@/lib/axios";
-
-interface Siswa {
-  id: number;
-  nama: string;
-  nis: string;
-  kelas: string;
-}
-
-interface SaldoData {
-  siswa_id: number;
-  nama: string;
-  saldo: number;
-  limit_harian: number;
-  sisa_limit: number;
-}
 
 interface Transaksi {
   id: number;
   nominal: number;
-  jenis: string;
-  keterangan: string;
+  status: string;
   created_at: string;
-  pedagang: { nama_kantin: string } | null;
+  pedagang?: {
+    nama_kantin: string;
+  };
 }
 
-export default function OrtuDashboardPage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+interface Siswa {
+  id: number;
+  nis: string;
+  nama: string;
+  kelas: string;
+  saldo_virtual: number;
+  limit_harian: number;
+  sisa_limit_hari_ini: number;
+}
+
+export default function DashboardOrtu() {
   const [siswa, setSiswa] = useState<Siswa | null>(null);
-  const [saldo, setSaldo] = useState<SaldoData | null>(null);
   const [histori, setHistori] = useState<Transaksi[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
@@ -42,33 +36,18 @@ export default function OrtuDashboardPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      setError("");
+      const res = await api.get("/user");
+      const user = res.data;
       
-      // 1. Get current logged in parent and their siswas
-      const userRes = await api.get("/user");
-      const user = userRes.data;
-      
-      if (!user.siswas || user.siswas.length === 0) {
-        setError("Belum ada data siswa yang terkait dengan akun Anda.");
-        setLoading(false);
-        return;
+      if (user.siswas && user.siswas.length > 0) {
+        const currentSiswa = user.siswas[0];
+        setSiswa(currentSiswa);
+        
+        const histRes = await api.get(`/siswa/${currentSiswa.id}/histori`);
+        setHistori(histRes.data);
       }
-      
-      // For now, we take the first child (if parent has multiple children, we could add a selector)
-      const currentSiswa = user.siswas[0];
-      setSiswa(currentSiswa);
-      
-      // 2. Get saldo and histori for this siswa
-      const [saldoRes, historiRes] = await Promise.all([
-        api.get(`/siswa/${currentSiswa.id}/saldo`),
-        api.get(`/siswa/${currentSiswa.id}/histori`)
-      ]);
-      
-      setSaldo(saldoRes.data);
-      setHistori(historiRes.data);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError("Gagal memuat data. Pastikan Anda memiliki akses.");
     } finally {
       setLoading(false);
     }
@@ -85,122 +64,105 @@ export default function OrtuDashboardPage() {
   if (loading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
       </div>
     );
   }
 
-  if (error) {
+  if (!siswa) {
     return (
-      <div className="rounded-lg bg-red-50 p-6 flex items-center gap-3">
-        <AlertCircle className="h-6 w-6 text-red-600" />
-        <p className="text-red-700 font-medium">{error}</p>
+      <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500 space-y-2">
+        <AlertCircle className="w-12 h-12 text-gray-300" />
+        <p>Belum ada data anak yang tertaut.</p>
       </div>
     );
   }
+
+  const limitPercentage = Math.min(100, Math.max(0, (siswa.sisa_limit_hari_ini / siswa.limit_harian) * 100));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold text-gray-900">Monitoring Anak</h1>
-        {siswa && (
-          <p className="text-gray-500">
-            Menampilkan data untuk ananda <span className="font-semibold text-gray-700">{siswa.nama}</span> (Kelas {siswa.kelas})
-          </p>
-        )}
-      </div>
-
-      {/* Saldo Cards */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 p-6 text-white shadow-lg">
-          <div className="flex items-center gap-4">
-            <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
-              <Wallet className="h-8 w-8 text-white" />
-            </div>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      
+      {/* Saldo Card */}
+      <div className="bg-emerald-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10">
+          <Wallet className="w-32 h-32" />
+        </div>
+        <div className="relative z-10">
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-sky-100 font-medium">Sisa Saldo Virtual</p>
-              <h3 className="text-3xl font-bold tracking-tight mt-1">
-                {saldo ? formatRupiah(saldo.saldo) : "-"}
-              </h3>
+              <p className="text-emerald-100 font-medium text-xs">Sisa Saldo Ananda</p>
+              <h2 className="text-sm font-semibold">{siswa.nama}</h2>
+            </div>
+            <div className="bg-emerald-700/50 rounded-full px-2 py-1 text-[10px] uppercase tracking-wider font-semibold border border-emerald-500/30">
+              KLS {siswa.kelas}
             </div>
           </div>
-        </div>
-
-        <div className="rounded-2xl bg-white p-6 shadow-md border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-700">Batas Jajan Hari Ini</h3>
-            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-              Reset tiap malam
-            </span>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-500">Sisa Limit</span>
-              <span className="font-medium text-gray-900">{saldo ? formatRupiah(saldo.sisa_limit) : "-"}</span>
-            </div>
-            {saldo && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2 overflow-hidden">
-                <div 
-                  className={`h-2.5 rounded-full ${
-                    (saldo.sisa_limit / saldo.limit_harian) > 0.5 ? "bg-emerald-500" :
-                    (saldo.sisa_limit / saldo.limit_harian) > 0.2 ? "bg-yellow-500" : "bg-red-500"
-                  }`} 
-                  style={{ width: `${Math.max(0, (saldo.sisa_limit / saldo.limit_harian) * 100)}%` }}
-                ></div>
-              </div>
-            )}
-            <p className="text-xs text-gray-400 mt-2">
-              Dari total jatah {saldo ? formatRupiah(saldo.limit_harian) : "-"} / hari
-            </p>
-          </div>
+          
+          <h2 className="text-4xl font-bold mt-4 mb-1">
+            {formatRupiah(siswa.saldo_virtual)}
+          </h2>
         </div>
       </div>
 
-      {/* History Table */}
-      <div className="rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center gap-2">
-            <History className="h-5 w-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900">Riwayat Jajan Terakhir (30 Hari)</h2>
-          </div>
+      {/* Limit Harian Card */}
+      <div className="bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-semibold text-gray-800 text-sm">Batas Jajan Hari Ini</h3>
+          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Reset Tiap Malam</span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Waktu</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tempat / Kantin</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Keterangan</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Nominal</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {histori.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    Belum ada riwayat transaksi.
-                  </td>
-                </tr>
-              ) : (
-                histori.map((trx) => (
-                  <tr key={trx.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {new Date(trx.created_at).toLocaleString("id-ID")}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                      {trx.pedagang?.nama_kantin || "-"}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {trx.keterangan || "Jajan"}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-right font-medium text-red-600">
-                      - {formatRupiah(trx.nominal)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        
+        <div className="flex justify-between items-end mb-2">
+          <span className="text-2xl font-bold text-gray-900">{formatRupiah(siswa.sisa_limit_hari_ini)}</span>
+        </div>
+        
+        <div className="w-full bg-gray-100 rounded-full h-2.5 mb-1 overflow-hidden">
+          <div 
+            className="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-out" 
+            style={{ width: `${limitPercentage}%` }}
+          ></div>
+        </div>
+        <p className="text-xs text-gray-500">
+          Dari total jatah {formatRupiah(siswa.limit_harian)} / hari
+        </p>
+      </div>
+
+      {/* Histori List */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <History className="w-5 h-5 text-emerald-600" />
+          <h3 className="font-bold text-gray-900 text-lg">Riwayat Jajan Terakhir</h3>
+        </div>
+        
+        <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50">
+          {histori.length > 0 ? (
+            histori.map((trx) => (
+              <div key={trx.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${trx.status === 'berhasil' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                    {trx.status === 'berhasil' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">
+                      {trx.pedagang?.nama_kantin || "Kantin"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {new Date(trx.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`font-bold ${trx.status === 'berhasil' ? 'text-gray-900' : 'text-gray-400 line-through'}`}>
+                    - {formatRupiah(trx.nominal)}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-sm">Belum ada riwayat transaksi.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
