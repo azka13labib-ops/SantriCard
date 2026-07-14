@@ -81,7 +81,7 @@ export default function PedagangHistoriPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300 max-w-2xl mx-auto">
       {/* Saldo Mengendap Card */}
       <div className="bg-emerald-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10">

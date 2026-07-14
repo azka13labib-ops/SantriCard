@@ -110,7 +110,7 @@ export default function PedagangScannerPage() {
   };
 
   return (
-    <div className="space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div className="space-y-5 animate-in fade-in zoom-in-95 duration-200 max-w-2xl mx-auto">
       
       {/* Nominal Input Card */}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 relative overflow-hidden">
