@@ -57,9 +57,14 @@ class SiswaController extends Controller
         }
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
-        $siswa = Siswa::with('ortu', 'kartu')->findOrFail($id);
+        $siswa = Siswa::with('ortu:id,name,email', 'kartu:id,siswa_id,status_aktif')->findOrFail($id);
+
+        if ($request->user()->role === 'ortu' && $siswa->ortu_id !== $request->user()->id) {
+            return response()->json(['message' => 'Forbidden: Anda tidak berhak mengakses data siswa ini'], 403);
+        }
+
         return response()->json($siswa);
     }
 
@@ -90,9 +95,13 @@ class SiswaController extends Controller
         return response()->json(['message' => 'Siswa berhasil dinonaktifkan']);
     }
 
-    public function saldo(string $id)
+    public function saldo(Request $request, string $id)
     {
         $siswa = Siswa::findOrFail($id);
+
+        if ($request->user()->role === 'ortu' && $siswa->ortu_id !== $request->user()->id) {
+            return response()->json(['message' => 'Forbidden: Anda tidak berhak mengakses data siswa ini'], 403);
+        }
         
         return response()->json([
             'siswa_id' => $siswa->id,
@@ -103,9 +112,13 @@ class SiswaController extends Controller
         ]);
     }
 
-    public function histori(string $id)
+    public function histori(Request $request, string $id)
     {
         $siswa = Siswa::findOrFail($id);
+
+        if ($request->user()->role === 'ortu' && $siswa->ortu_id !== $request->user()->id) {
+            return response()->json(['message' => 'Forbidden: Anda tidak berhak mengakses data siswa ini'], 403);
+        }
         
         $transaksis = $siswa->transaksis()->with('pedagang:id,nama_kantin')
             ->where('created_at', '>=', now()->subDays(30))
