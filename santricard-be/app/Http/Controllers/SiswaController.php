@@ -37,9 +37,9 @@ class SiswaController extends Controller
                 'aktif' => true,
             ]);
 
-            // Generate Kartu
+            // Generate Kartu — menggunakan UUID v4 untuk kriptografis acak
             $uid_rfid = Str::random(10); // Dummy RFID for now if no scanner
-            $qr_code_hash = hash('sha256', $siswa->nis . time());
+            $qr_code_hash = (string) Str::uuid(); // UUID v4, cryptographically random
 
             Kartu::create([
                 'siswa_id' => $siswa->id,
