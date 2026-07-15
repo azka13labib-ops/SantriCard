@@ -29,7 +29,7 @@ class TopupController extends Controller
     public function store(Request $request, string $siswa_id)
     {
         $request->validate([
-            'nominal' => 'required|numeric|min:1',
+            'nominal' => 'required|numeric|min:1|max:10000000',
             'metode' => 'required|string',
             'catatan' => 'nullable|string',
             'bukti_transfer' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120' // max 5MB
