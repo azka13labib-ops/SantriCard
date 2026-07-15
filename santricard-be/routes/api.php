@@ -78,6 +78,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Pedagang Routes (Only)
     Route::middleware('role:pedagang')->group(function () {
-        Route::post('/transaksi', [TransaksiController::class, 'store']);
+        Route::post('/transaksi', [TransaksiController::class, 'store'])->middleware('throttle:60,1');
     });
 });
