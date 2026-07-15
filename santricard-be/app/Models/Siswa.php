@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Siswa extends Model
 {
     protected $guarded = ['id'];
-    protected $appends = ['sisa_limit_hari_ini'];
+    // Catatan: 'sisa_limit_hari_ini' TIDAK dimasukkan ke $appends untuk menghindari
+    // N+1 query saat endpoint index() dipanggil. Accessor ini digunakan secara eksplisit
+    // hanya di endpoint saldo() dan saat transaksi diproses.
 
     public function ortu()
     {
