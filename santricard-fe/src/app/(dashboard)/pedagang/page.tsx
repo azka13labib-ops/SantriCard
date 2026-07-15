@@ -1,20 +1,109 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import { CreditCard, QrCode, Zap, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CreditCard, QrCode, Zap, CheckCircle2, XCircle, AlertCircle, Loader2, WifiOff, Clock } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
+
+// ── Tipe untuk antrian transaksi offline ──
+interface OfflineTransaction {
+  id: string; // UUID sebagai idempotency_key
+  kode_kartu: string;
+  nominal: number;
+  timestamp: number;
+}
+
+const OFFLINE_QUEUE_KEY = "santricard_offline_queue";
+
+function loadOfflineQueue(): OfflineTransaction[] {
+  try {
+    const raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveOfflineQueue(queue: OfflineTransaction[]) {
+  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
+}
+
+function generateUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
 
 export default function PedagangScannerPage() {
   const [nominal, setNominal] = useState("");
   const [isScanning, setIsScanning] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info', title: string, text: string} | null>(null);
+  const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info' | 'offline', title: string, text: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [offlineQueue, setOfflineQueue] = useState<OfflineTransaction[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
+  // ── Monitor status koneksi internet ──
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    setIsOnline(navigator.onLine);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
+  // ── Muat antrian offline dari localStorage saat mount ──
+  useEffect(() => {
+    setOfflineQueue(loadOfflineQueue());
+  }, []);
+
+  // ── Auto-sync saat koneksi kembali ──
+  const syncOfflineQueue = useCallback(async () => {
+    const queue = loadOfflineQueue();
+    if (queue.length === 0 || isSyncing) return;
+
+    setIsSyncing(true);
+    let remaining = [...queue];
+
+    for (const trx of queue) {
+      try {
+        await api.post("/transaksi", {
+          kode_kartu: trx.kode_kartu,
+          nominal: trx.nominal,
+          idempotency_key: trx.id,
+        });
+        // Hapus dari antrian jika berhasil
+        remaining = remaining.filter(r => r.id !== trx.id);
+        saveOfflineQueue(remaining);
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.status && err.response.status < 500) {
+          // Error validasi — hapus dari antrian agar tidak retry terus
+          remaining = remaining.filter(r => r.id !== trx.id);
+          saveOfflineQueue(remaining);
+        }
+        // Error 5xx atau koneksi masih putus — biarkan di antrian
+      }
+    }
+
+    setOfflineQueue(loadOfflineQueue());
+    setIsSyncing(false);
+  }, [isSyncing]);
+
+  useEffect(() => {
+    if (isOnline && offlineQueue.length > 0) {
+      syncOfflineQueue();
+    }
+  }, [isOnline, offlineQueue.length, syncOfflineQueue]);
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -34,7 +123,6 @@ export default function PedagangScannerPage() {
     setIsScanning(true);
     setStatusMsg(null);
     
-    // Tunggu DOM selesai dirender sebelum inisialisasi Html5Qrcode
     setTimeout(async () => {
       try {
         scannerRef.current = new Html5Qrcode("reader");
@@ -64,7 +152,6 @@ export default function PedagangScannerPage() {
     setIsScanning(false);
   };
 
-  // Stop scanner on unmount
   useEffect(() => {
     return () => {
       stopScanner();
@@ -72,20 +159,47 @@ export default function PedagangScannerPage() {
   }, []);
 
   const onScanSuccess = async (decodedText: string) => {
-    // Prevent multiple scans
     if (isProcessing) return;
     
     setIsProcessing(true);
-    await stopScanner(); // Stop scanning immediately once caught
+    await stopScanner();
 
     const numNominal = Number(nominal.replace(/\D/g, ""));
+
+    // ── Offline mode: simpan ke antrian lokal ──
+    if (!navigator.onLine) {
+      const offlineTrx: OfflineTransaction = {
+        id: generateUUID(),
+        kode_kartu: decodedText,
+        nominal: numNominal,
+        timestamp: Date.now(),
+      };
+      
+      const currentQueue = loadOfflineQueue();
+      const newQueue = [...currentQueue, offlineTrx];
+      saveOfflineQueue(newQueue);
+      setOfflineQueue(newQueue);
+      
+      setStatusMsg({
+        type: 'offline',
+        title: 'Disimpan Offline',
+        text: `Transaksi ${formatRupiah(numNominal)} disimpan dan akan dikirim otomatis saat koneksi tersedia. (${newQueue.length} transaksi dalam antrian)`
+      });
+      setNominal("");
+      setIsProcessing(false);
+      return;
+    }
+    
+    // ── Online mode: proses langsung dengan idempotency key ──
+    const idempotencyKey = generateUUID();
     
     try {
       setStatusMsg({ type: 'info', title: 'Memproses...', text: 'Tunggu sebentar, sedang memproses transaksi.'});
       
       const res = await api.post("/transaksi", {
         kode_kartu: decodedText,
-        nominal: numNominal
+        nominal: numNominal,
+        idempotency_key: idempotencyKey,
       });
 
       setStatusMsg({ 
@@ -93,7 +207,7 @@ export default function PedagangScannerPage() {
         title: 'Berhasil!', 
         text: `Transaksi sejumlah ${formatRupiah(numNominal)} untuk ${res.data.siswa} berhasil.`
       });
-      setNominal(""); // Reset nominal for next trx
+      setNominal("");
     } catch (err: unknown) {
       console.error(err);
       if (axios.isAxiosError(err)) {
@@ -121,6 +235,33 @@ export default function PedagangScannerPage() {
   return (
     <div className="space-y-5 animate-in fade-in zoom-in-95 duration-200 max-w-2xl mx-auto">
       
+      {/* Status Koneksi */}
+      {!isOnline && (
+        <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm font-medium text-amber-800">
+          <WifiOff className="w-4 h-4 shrink-0" />
+          Mode Offline — Transaksi akan disimpan dan dikirim saat koneksi tersedia.
+        </div>
+      )}
+
+      {/* Antrian Offline */}
+      {offlineQueue.length > 0 && (
+        <div className="flex items-center justify-between rounded-xl bg-blue-50 border border-blue-200 px-4 py-2.5 text-sm text-blue-800">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 shrink-0" />
+            <span><b>{offlineQueue.length}</b> transaksi menunggu sinkronisasi</span>
+          </div>
+          {isOnline && (
+            <button
+              onClick={syncOfflineQueue}
+              disabled={isSyncing}
+              className="text-xs font-bold text-blue-700 hover:underline disabled:opacity-50"
+            >
+              {isSyncing ? "Menyinkronkan..." : "Sinkronkan Sekarang"}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Nominal Input Card */}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-5">
@@ -181,11 +322,13 @@ export default function PedagangScannerPage() {
         <div className={`p-4 rounded-2xl flex items-start gap-3 border ${
           statusMsg.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 
           statusMsg.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 
+          statusMsg.type === 'offline' ? 'bg-amber-50 border-amber-200 text-amber-800' :
           'bg-blue-50 border-blue-200 text-blue-800'
         }`}>
           {statusMsg.type === 'success' && <CheckCircle2 className="w-6 h-6 shrink-0 text-emerald-500 mt-0.5" />}
           {statusMsg.type === 'error' && <XCircle className="w-6 h-6 shrink-0 text-red-500 mt-0.5" />}
           {statusMsg.type === 'info' && <AlertCircle className="w-6 h-6 shrink-0 text-blue-500 mt-0.5" />}
+          {statusMsg.type === 'offline' && <WifiOff className="w-6 h-6 shrink-0 text-amber-500 mt-0.5" />}
           
           <div>
             <h3 className="font-bold text-base">{statusMsg.title}</h3>

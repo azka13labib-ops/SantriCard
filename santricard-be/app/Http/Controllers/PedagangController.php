@@ -13,7 +13,7 @@ class PedagangController extends Controller
 {
     public function index()
     {
-        $pedagangs = Pedagang::with('user:id,name,email')->get();
+        $pedagangs = Pedagang::with('user:id,name,email')->paginate(25);
         return response()->json($pedagangs);
     }
 
@@ -83,15 +83,32 @@ class PedagangController extends Controller
         $transaksis = $pedagang->transaksis()->with('siswa:id,nama')
             ->where('created_at', '>=', now()->subDays(30))
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(25);
             
-        $totalPenjualanBulanIni = $transaksis->where('status', 'berhasil')->sum('nominal');
+        $totalPenjualanBulanIni = $pedagang->transaksis()
+            ->where('created_at', '>=', now()->subDays(30))
+            ->where('status', 'berhasil')
+            ->sum('nominal');
 
         return response()->json([
             'pedagang' => $pedagang->nama_kantin,
             'saldo_mengendap' => $pedagang->saldo_mengendap,
             'total_penjualan_30_hari' => $totalPenjualanBulanIni,
             'histori_transaksi' => $transaksis
+        ]);
+    }
+
+    public function verifikasi(Request $request, string $id)
+    {
+        $pedagang = Pedagang::findOrFail($id);
+        $pedagang->terverifikasi = !$pedagang->terverifikasi;
+        $pedagang->save();
+
+        $status = $pedagang->terverifikasi ? 'diverifikasi' : 'dibatalkan verifikasinya';
+
+        return response()->json([
+            'message' => "Pedagang berhasil {$status}",
+            'data' => $pedagang
         ]);
     }
 }

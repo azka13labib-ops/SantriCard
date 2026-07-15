@@ -14,7 +14,7 @@ class TopupController extends Controller
     // ADMIN: Lihat semua pengajuan topup
     public function index()
     {
-        $topups = Topup::with('siswa:id,nama,nis')->orderBy('created_at', 'desc')->get();
+        $topups = Topup::with('siswa:id,nama,nis')->orderBy('created_at', 'desc')->paginate(25);
         return response()->json($topups);
     }
 

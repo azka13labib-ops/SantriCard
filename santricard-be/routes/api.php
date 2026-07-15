@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pedagang', [PedagangController::class, 'index']);
         Route::post('/pedagang', [PedagangController::class, 'store']);
         Route::patch('/pedagang/{id}', [PedagangController::class, 'update']);
+        Route::post('/pedagang/{id}/verifikasi', [PedagangController::class, 'verifikasi']);
         
         // Settlement
         Route::get('/settlement', [SettlementController::class, 'index']);

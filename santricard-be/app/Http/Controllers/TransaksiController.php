@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Kartu;
 use App\Models\Siswa;
 use App\Models\Pedagang;
@@ -15,16 +16,16 @@ class TransaksiController extends Controller
     {
         $transaksis = Transaksi::with(['siswa:id,nama', 'pedagang:id,nama_kantin'])
             ->orderBy('created_at', 'desc')
-            ->limit(100) // Batasi 100 terakhir agar tidak berat. Aslinya butuh pagination.
-            ->get();
+            ->paginate(25);
         return response()->json($transaksis);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'kode_kartu' => 'required',
+            'kode_kartu' => 'required|string',
             'nominal' => 'required|numeric|min:500|max:20000',
+            'idempotency_key' => 'nullable|string|max:50',
         ]);
 
         $pedagangId = $request->user()->pedagang->id ?? null;
@@ -32,10 +33,32 @@ class TransaksiController extends Controller
             return response()->json(['message' => 'Anda bukan pedagang'], 403);
         }
 
+        // ── Fix #6: Idempotency check — cegah transaksi double saat retry ──
+        if ($request->filled('idempotency_key')) {
+            $existing = Transaksi::where('idempotency_key', $request->idempotency_key)->first();
+            if ($existing) {
+                return response()->json([
+                    'status' => 'berhasil',
+                    'message' => 'Transaksi sudah diproses sebelumnya (idempotent).',
+                    'transaksi_id' => $existing->id,
+                    'nominal' => $existing->nominal,
+                ]);
+            }
+        }
+
         DB::beginTransaction();
         try {
             // Lock pedagang record
             $pedagang = Pedagang::where('id', $pedagangId)->lockForUpdate()->first();
+
+            // ── Fix #15: Cek apakah pedagang sudah diverifikasi admin ──
+            if (!$pedagang->terverifikasi) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => 'ditolak',
+                    'alasan' => 'Akun kantin Anda belum diverifikasi oleh Admin. Hubungi admin sekolah.'
+                ], 403);
+            }
 
             // Cari kartu
             $kartu = Kartu::where('uid_rfid', $request->kode_kartu)
@@ -70,12 +93,12 @@ class TransaksiController extends Controller
                 ], 400);
             }
 
-            if ($siswa->sisa_limit_hari_ini < $request->nominal) {
+            if ($siswa->getSisaLimitHariIniAttribute() < $request->nominal) {
                 DB::rollBack();
                 return response()->json([
                     'status' => 'ditolak',
                     'alasan' => 'Limit harian habis atau tidak mencukupi',
-                    'sisa_limit' => $siswa->sisa_limit_hari_ini,
+                    'sisa_limit' => $siswa->getSisaLimitHariIniAttribute(),
                     'nominal_diminta' => $request->nominal
                 ], 400);
             }
@@ -88,8 +111,9 @@ class TransaksiController extends Controller
             $pedagang->saldo_mengendap += $request->nominal;
             $pedagang->save();
 
-            // Catat transaksi
+            // Catat transaksi (dengan idempotency_key jika ada)
             $transaksi = Transaksi::create([
+                'idempotency_key' => $request->idempotency_key ?: null,
                 'siswa_id' => $siswa->id,
                 'pedagang_id' => $pedagang->id,
                 'nominal' => $request->nominal,
@@ -103,15 +127,16 @@ class TransaksiController extends Controller
                 'transaksi_id' => $transaksi->id,
                 'nominal' => $transaksi->nominal,
                 'sisa_saldo' => $siswa->saldo_virtual,
-                'sisa_limit' => $siswa->sisa_limit_hari_ini,
+                'sisa_limit' => $siswa->getSisaLimitHariIniAttribute(),
                 'siswa' => $siswa->nama,
                 'pedagang' => $pedagang->nama_kantin
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('TransaksiController@store failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 'gagal',
-                'alasan' => 'Terjadi kesalahan sistem'
+                'alasan' => 'Terjadi kesalahan sistem. Silakan coba lagi.'
             ], 500);
         }
     }
