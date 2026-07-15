@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Pedagang;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class PedagangController extends Controller
 {
@@ -50,7 +51,8 @@ class PedagangController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal menambah pedagang', 'error' => $e->getMessage()], 500);
+            Log::error('PedagangController@store failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal menambah pedagang. Silakan coba lagi.'], 500);
         }
     }
 

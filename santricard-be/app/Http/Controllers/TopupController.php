@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Siswa;
 use App\Models\Topup;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class TopupController extends Controller
@@ -74,9 +75,9 @@ class TopupController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('TopupController@store failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
-                'message' => 'Top-up gagal',
-                'error' => $e->getMessage()
+                'message' => 'Top-up gagal. Silakan coba lagi atau hubungi admin.'
             ], 500);
         }
     }
@@ -115,9 +116,9 @@ class TopupController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('TopupController@verifikasi failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
-                'message' => 'Gagal memverifikasi',
-                'error' => $e->getMessage()
+                'message' => 'Gagal memverifikasi. Silakan coba lagi.'
             ], 500);
         }
     }

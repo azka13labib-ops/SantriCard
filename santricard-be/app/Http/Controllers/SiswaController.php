@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Siswa;
 use App\Models\Kartu;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SiswaController extends Controller
@@ -53,7 +54,8 @@ class SiswaController extends Controller
             return response()->json(['message' => 'Siswa berhasil ditambahkan', 'data' => $siswa->load('kartu')], 201);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
-            return response()->json(['message' => 'Gagal menambah siswa', 'error' => $e->getMessage()], 500);
+            Log::error('SiswaController@store failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal menambah siswa. Silakan coba lagi.'], 500);
         }
     }
 
