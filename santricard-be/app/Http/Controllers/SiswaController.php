@@ -22,7 +22,7 @@ class SiswaController extends Controller
             'nis' => 'required|digits:10|unique:siswas',
             'nama' => 'required|string',
             'kelas' => 'required|string',
-            'limit_harian' => 'required|numeric|max:20000'
+            'limit_harian' => 'required|numeric|min:500|max:20000'
         ]);
 
         \Illuminate\Support\Facades\DB::beginTransaction();
@@ -70,7 +70,7 @@ class SiswaController extends Controller
         $request->validate([
             'nama' => 'sometimes|string',
             'kelas' => 'sometimes|string',
-            'limit_harian' => 'sometimes|numeric'
+            'limit_harian' => 'sometimes|numeric|min:500|max:20000'
         ]);
 
         $siswa->update($request->only('nama', 'kelas', 'limit_harian'));
