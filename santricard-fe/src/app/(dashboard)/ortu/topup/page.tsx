@@ -110,11 +110,11 @@ export default function OrtuTopupPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "berhasil":
-        return <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-[10px] font-medium text-green-800 uppercase tracking-wider"><CheckCircle2 className="w-3 h-3"/> Berhasil</span>;
+        return <span className="badge-success inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"><CheckCircle2 className="w-3 h-3"/> Berhasil</span>;
       case "pending":
-        return <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-[10px] font-medium text-yellow-800 uppercase tracking-wider"><Clock className="w-3 h-3"/> Menunggu</span>;
+        return <span className="badge-pending inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"><Clock className="w-3 h-3"/> Menunggu</span>;
       case "gagal":
-        return <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-medium text-red-800 uppercase tracking-wider"><XCircle className="w-3 h-3"/> Ditolak</span>;
+        return <span className="badge-error inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"><XCircle className="w-3 h-3"/> Ditolak</span>;
       default:
         return null;
     }

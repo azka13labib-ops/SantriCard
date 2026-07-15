@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Check, X, Eye } from "lucide-react";
+import axios from "axios";
 import api from "@/lib/axios";
 
 interface TopupData {
@@ -49,9 +50,12 @@ export default function AdminTopupVerification() {
     try {
       await api.post(`/topup/${id}/verifikasi`, { status });
       fetchTopups();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.response?.data?.message || "Terjadi kesalahan saat memverifikasi.");
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : undefined;
+      alert(message || "Terjadi kesalahan saat memverifikasi.");
     }
   };
 
@@ -115,22 +119,19 @@ export default function AdminTopupVerification() {
                         <span className="capitalize">{item.metode.replace('_', ' ')}</span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        {item.status === 'pending' && (
-                          <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">Menunggu</span>
-                        )}
-                        {item.status === 'berhasil' && (
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Berhasil</span>
-                        )}
-                        {item.status === 'gagal' && (
-                          <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">Ditolak</span>
-                        )}
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          item.status === 'pending'  ? 'badge-pending' :
+                          item.status === 'berhasil' ? 'badge-success' : 'badge-error'
+                        }`}>
+                          {item.status === 'pending' ? 'Menunggu' : item.status === 'berhasil' ? 'Berhasil' : 'Ditolak'}
+                        </span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                         <div className="flex justify-end gap-2 items-center">
                           {item.bukti_transfer && (
                             <button
                               onClick={() => setSelectedImage(`http://localhost:8000/storage/${item.bukti_transfer}`)}
-                              className="text-blue-600 hover:text-blue-900 flex items-center gap-1 bg-blue-50 px-2 py-1 rounded"
+                              className="text-emerald-700 hover:text-emerald-900 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded font-medium text-xs"
                             >
                               <Eye className="w-4 h-4" /> Bukti
                             </button>
@@ -181,7 +182,8 @@ export default function AdminTopupVerification() {
             >
               <X className="w-6 h-6" />
             </button>
-            <img src={selectedImage} alt="Bukti Transfer" className="max-w-full h-auto rounded" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={selectedImage ?? undefined} alt="Bukti Transfer" className="max-w-full h-auto rounded" />
           </div>
         </div>
       )}

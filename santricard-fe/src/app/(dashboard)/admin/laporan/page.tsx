@@ -122,7 +122,10 @@ export default function DataLaporan() {
                   Rp {item.nominal.toLocaleString('id-ID')}
                 </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    item.status === 'berhasil' ? 'badge-success' :
+                    item.status === 'pending'  ? 'badge-pending' : 'badge-error'
+                  }`}>
                     <CheckCircle2 className="h-3 w-3" />
                     {item.status}
                   </span>
