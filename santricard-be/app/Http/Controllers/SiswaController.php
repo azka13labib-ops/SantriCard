@@ -12,7 +12,7 @@ class SiswaController extends Controller
 {
     public function index()
     {
-        $siswas = Siswa::with('ortu', 'kartu')->get();
+        $siswas = Siswa::with('ortu:id,name,email', 'kartu:id,siswa_id,status_aktif')->get();
         return response()->json($siswas);
     }
 
