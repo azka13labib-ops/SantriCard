@@ -9,12 +9,12 @@ export default function Sidebar() {
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/admin" },
-    { name: "Data Siswa", icon: Users, href: "/admin/siswa" },
-    { name: "Data Orang Tua", icon: Users, href: "/admin/ortu" },
-    { name: "Data Kantin", icon: Store, href: "/admin/pedagang" },
-    { name: "Verifikasi Top-Up", icon: ReceiptText, href: "/admin/topup" },
-    { name: "Transaksi", icon: ReceiptText, href: "/admin/transaksi" },
-    { name: "Laporan", icon: FileText, href: "/admin/laporan" },
+    { name: "Data Student", icon: Users, href: "/admin/student" },
+    { name: "Data Orang Tua", icon: Users, href: "/admin/parent" },
+    { name: "Data Kantin", icon: Store, href: "/admin/merchant" },
+    { name: "Verifikasi Top-Up", icon: ReceiptText, href: "/admin/topUp" },
+    { name: "Transaction", icon: ReceiptText, href: "/admin/transaction" },
+    { name: "Report", icon: FileText, href: "/admin/report" },
   ];
 
   return (

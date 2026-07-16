@@ -4,7 +4,7 @@ namespace App\Contracts;
 
 use App\Models\User;
 
-interface TopupServiceInterface
+interface TopUpServiceInterface
 {
     /**
      * Process a top-up request.
@@ -23,7 +23,7 @@ interface TopupServiceInterface
      * @param string $topupId
      * @param string $status
      * @param User $adminUser
-     * @return \App\Models\Topup
+     * @return \App\Models\TopUp
      */
     public function verifyTopup(string $topupId, string $status, User $adminUser);
 }

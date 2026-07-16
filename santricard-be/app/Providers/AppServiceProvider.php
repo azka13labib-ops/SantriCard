@@ -13,8 +13,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            \App\Contracts\TopupServiceInterface::class,
-            \App\Services\TopupService::class
+            \App\Contracts\TopUpServiceInterface::class,
+            \App\Services\TopUpService::class
         );
     }
 
@@ -32,9 +32,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Konfigurasi Rate Limit khusus Login (Mencegah Brute Force)
-        // Maksimal 5 percobaan per menit per IP
+        // Maksimal 3 percobaan per 5 menit per IP
         \Illuminate\Support\Facades\RateLimiter::for('login', function (\Illuminate\Http\Request $request) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by($request->ip());
+            return \Illuminate\Cache\RateLimiting\Limit::perMinutes(5, 3)->by($request->ip());
         });
     }
 }

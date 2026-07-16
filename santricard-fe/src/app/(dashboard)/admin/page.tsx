@@ -5,13 +5,13 @@ import { Users, Store, Wallet, ArrowUpRight, Loader2 } from "lucide-react";
 import api from "@/lib/axios";
 
 interface DashboardData {
-  siswa: { total: number; aktif: number; saldo_beredar: number };
-  pedagang: { total: number; aktif: number };
+  student: { total: number; aktif: number; saldo_beredar: number };
+  merchant: { total: number; aktif: number };
   transaksi_hari_ini: { total: number; berhasil: number; ditolak: number; nominal_total: number };
   transaksi_terakhir: Array<{
     id: number;
-    siswa: { nama: string } | null;
-    pedagang: { nama_kantin: string } | null;
+    student: { nama: string } | null;
+    merchant: { nama_kantin: string } | null;
     nominal: number;
     created_at: string;
     status: string;
@@ -60,17 +60,17 @@ export default function AdminDashboard() {
   }
 
   const kpiData = [
-    { title: "Total Siswa", value: data.siswa.total, icon: Users, trend: data.siswa.aktif + " Aktif", trendUp: true },
-    { title: "Total Kantin", value: data.pedagang.total, icon: Store, trend: data.pedagang.aktif + " Aktif", trendUp: true },
+    { title: "Total Student", value: data.student.total, icon: Users, trend: data.student.aktif + " Aktif", trendUp: true },
+    { title: "Total Kantin", value: data.merchant.total, icon: Store, trend: data.merchant.aktif + " Aktif", trendUp: true },
     { 
       title: "Saldo Beredar", 
-      value: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(data.siswa.saldo_beredar), 
+      value: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(data.student.saldo_beredar), 
       icon: Wallet, 
       trend: "Total", 
       trendUp: true 
     },
     { 
-      title: "Transaksi Hari Ini", 
+      title: "Transaction Hari Ini", 
       value: data.transaksi_hari_ini.total, 
       icon: ArrowUpRight, 
       trend: data.transaksi_hari_ini.berhasil + " Berhasil", 
@@ -106,20 +106,20 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Tabel Transaksi Terkini */}
+      {/* Tabel Transaction Terkini */}
       <div className="mt-8 rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="border-b border-gray-200 px-6 py-5">
-          <h3 className="text-base font-semibold leading-6 text-gray-900">Transaksi Terkini</h3>
+          <h3 className="text-base font-semibold leading-6 text-gray-900">Transaction Terkini</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  ID Transaksi
+                  ID Transaction
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Siswa
+                  Student
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Kantin
@@ -140,8 +140,8 @@ export default function AdminDashboard() {
                 data.transaksi_terakhir.map((trx) => (
                   <tr key={trx.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">TRX-{trx.id}</td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{trx.siswa?.nama || '-'}</td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{trx.pedagang?.nama_kantin || '-'}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{trx.student?.nama || '-'}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{trx.merchant?.nama_kantin || '-'}</td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
                       {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(trx.nominal)}
                     </td>
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
               ) : (
                 <tr>
                   <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                    Belum ada transaksi
+                    Belum ada transaction
                   </td>
                 </tr>
               )}

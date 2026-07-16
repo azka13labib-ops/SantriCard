@@ -2,90 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\TopupServiceInterface;
-use App\Http\Requests\StoreTopupRequest;
-use App\Http\Requests\VerifyTopupRequest;
-use App\Http\Resources\TopupResource;
-use App\Models\Topup;
+use App\Contracts\TopUpServiceInterface;
+use App\Http\Requests\StoreTopUpRequest;
+use App\Http\Requests\VerifyTopUpRequest;
+use App\Http\Resources\TopUpResource;
+use App\Models\TopUp;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
-class TopupController extends Controller
+class TopUpController extends Controller
 {
     use ApiResponse;
 
-    protected TopupServiceInterface $topupService;
+    protected TopUpServiceInterface $topupService;
 
-    public function __construct(TopupServiceInterface $topupService)
+    public function __construct(TopUpServiceInterface $topupService)
     {
         $this->topupService = $topupService;
     }
 
     /**
-     * Get paginated topups.
+     * Get paginated top_ups.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $topups = Topup::with('siswa:id,nama,nis')->orderBy('created_at', 'desc')->paginate(25);
-        return response()->json($topups); // Bisa menggunakan return TopupResource::collection($topups) nantinya.
-    }
+        $query = TopUp::with('student:id,nama,nis,kelas', 'user:id,name');
 
-    /**
-     * Get topup history for a specific siswa.
-     */
-    public function history(string $siswa_id): JsonResponse
-    {
-        $topups = Topup::where('siswa_id', $siswa_id)->orderBy('created_at', 'desc')->get();
+        if ($request->user()->role === 'parent') {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('parent_id', $request->user()->id);
+            });
+        }
+
+        $topups = $query->orderBy('created_at', 'desc')->paginate(15);
+        
         return response()->json($topups);
     }
 
     /**
-     * Store a new topup request.
+     * Get topUp history for a specific student.
      */
-    public function store(StoreTopupRequest $request, string $siswa_id): JsonResponse
+    public function history(string $student_id): JsonResponse
+    {
+        $top_ups = TopUp::where('student_id', $student_id)->orderBy('created_at', 'desc')->get();
+        return response()->json($top_ups);
+    }
+
+    /**
+     * Store a new topUp request.
+     */
+    public function store(StoreTopUpRequest $request, string $student_id): JsonResponse
     {
         try {
             $result = $this->topupService->processTopup(
-                $siswa_id,
+                $student_id,
                 $request->validated(),
                 $request->user(),
                 $request->file('bukti_transfer')
             );
-
-            $message = $result['status'] === 'berhasil' 
-                ? 'Top-up berhasil' 
-                : 'Pengajuan top-up berhasil, menunggu verifikasi Admin.';
-
-            return $this->successResponse([
-                'topup' => new TopupResource($result['topup']),
-                'saldo_sekarang' => $result['saldo_sekarang']
-            ], $message, 201);
+            
+            return response()->json([
+                'message' => 'Topup berhasil diajukan. Menunggu verifikasi.',
+                'data' => $result['topup']
+            ], 201);
 
         } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(), $e->getCode() ?: 500);
+            return response()->json([
+                'message' => 'Gagal memproses topup: ' . $e->getMessage()
+            ], 400);
         }
     }
 
     /**
-     * ADMIN: Verifikasi topup pending
+     * ADMIN: Verifikasi topUp pending
      */
-    public function verifikasi(VerifyTopupRequest $request, string $id): JsonResponse
+    public function verifikasi(VerifyTopUpRequest $request, string $id): JsonResponse
     {
         try {
-            $topup = $this->topupService->verifyTopup(
+            $topUp = $this->topupService->verifyTopup(
                 $id,
                 $request->validated('status'),
                 $request->user()
             );
 
-            return $this->successResponse(
-                new TopupResource($topup), 
-                'Verifikasi top-up tersimpan'
-            );
+            return response()->json([
+                'message' => 'Status topup berhasil diupdate',
+                'data' => $topUp
+            ]);
 
         } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(), $e->getCode() ?: 500);
+            return response()->json([
+                'message' => 'Gagal memverifikasi topup: ' . $e->getMessage()
+            ], 400);
         }
     }
 }

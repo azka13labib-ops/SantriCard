@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Transaksi;
-use App\Models\Siswa;
-use App\Models\Pedagang;
+use App\Models\Transaction;
+use App\Models\Student;
+use App\Models\Merchant;
 
 class DashboardController extends Controller
 {
@@ -13,22 +13,22 @@ class DashboardController extends Controller
     {
         $today = today();
 
-        $transaksisHariIni = Transaksi::whereDate('created_at', $today)->get();
+        $transaksisHariIni = Transaction::whereDate('created_at', $today)->get();
         
         $totalTransaksi = $transaksisHariIni->count();
         $transaksiBerhasil = $transaksisHariIni->where('status', 'berhasil')->count();
         $transaksiDitolak = $transaksisHariIni->where('status', 'ditolak')->count();
         $nominalTotal = $transaksisHariIni->where('status', 'berhasil')->sum('nominal');
 
-        $totalSiswa = Siswa::count();
-        $siswaAktif = Siswa::where('aktif', true)->count();
-        $saldoBeredar = Siswa::sum('saldo_virtual');
+        $totalSiswa = Student::count();
+        $siswaAktif = Student::where('aktif', true)->count();
+        $saldoBeredar = Student::sum('saldo_virtual');
 
-        $totalPedagang = Pedagang::count();
-        // Asumsi pedagang aktif jika ada relasi user dan tidak diblokir, sementara anggap semua aktif
-        $pedagangAktif = Pedagang::count(); 
+        $totalPedagang = Merchant::count();
+        // Asumsi merchant aktif jika ada relasi user dan tidak diblokir, sementara anggap semua aktif
+        $pedagangAktif = Merchant::count(); 
 
-        $transaksiTerakhir = Transaksi::with(['siswa', 'pedagang'])
+        $transaksiTerakhir = Transaction::with(['student', 'merchant'])
             ->latest()
             ->take(5)
             ->get();
@@ -40,12 +40,12 @@ class DashboardController extends Controller
                 'ditolak' => $transaksiDitolak,
                 'nominal_total' => $nominalTotal
             ],
-            'siswa' => [
+            'student' => [
                 'total' => $totalSiswa,
                 'aktif' => $siswaAktif,
                 'saldo_beredar' => $saldoBeredar
             ],
-            'pedagang' => [
+            'merchant' => [
                 'total' => $totalPedagang,
                 'aktif' => $pedagangAktif
             ],

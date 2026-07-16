@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kartus', function (Blueprint $table) {
+        Schema::create('cards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
             $table->string('uid_rfid', 50)->unique();
             $table->string('qr_code_hash', 100)->unique();
             $table->boolean('status_aktif')->default(true);
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kartus');
+        Schema::dropIfExists('cards');
     }
 };

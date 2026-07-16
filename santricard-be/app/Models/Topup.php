@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Topup extends Model
+class TopUp extends Model
 {
     protected $guarded = ['id'];
 
-    public function siswa()
+    public function student()
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Student::class);
     }
 }

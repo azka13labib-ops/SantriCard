@@ -31,13 +31,13 @@ class User extends Authenticatable
         ];
     }
 
-    public function siswas()
+    public function students()
     {
-        return $this->hasMany(Siswa::class, 'ortu_id');
+        return $this->hasMany(Student::class, 'parent_id');
     }
 
-    public function pedagang()
+    public function merchant()
     {
-        return $this->hasOne(Pedagang::class);
+        return $this->hasOne(Merchant::class);
     }
 }

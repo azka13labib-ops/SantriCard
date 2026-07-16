@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TopupResource extends JsonResource
+class TopUpResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -23,11 +23,11 @@ class TopupResource extends JsonResource
             'bukti_transfer_url' => $this->bukti_transfer ? asset('storage/' . $this->bukti_transfer) : null,
             'verified_by' => $this->verified_by,
             'created_at' => $this->created_at,
-            'siswa' => $this->whenLoaded('siswa', function () {
+            'student' => $this->whenLoaded('student', function () {
                 return [
-                    'id' => $this->siswa->id,
-                    'nama' => $this->siswa->nama,
-                    'nis' => $this->siswa->nis,
+                    'id' => $this->student->id,
+                    'nama' => $this->student->nama,
+                    'nis' => $this->student->nis,
                 ];
             }),
         ];

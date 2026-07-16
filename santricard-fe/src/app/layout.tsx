@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SantriCard — Sistem Kartu Jual Beli Siswa",
-  description: "Kelola saldo, transaksi, dan topup santri dengan mudah dan aman.",
+  title: "SantriCard — Sistem Card Jual Beli Student",
+  description: "Kelola saldo, transaction, dan topUp santri dengan mudah dan aman.",
 };
 
 export default function RootLayout({

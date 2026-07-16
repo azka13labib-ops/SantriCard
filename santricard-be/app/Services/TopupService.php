@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
-use App\Contracts\TopupServiceInterface;
-use App\Enums\TopupStatus;
-use App\Models\Siswa;
-use App\Models\Topup;
+use App\Contracts\TopUpServiceInterface;
+use App\Enums\TopUpStatus;
+use App\Models\Student;
+use App\Models\TopUp;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class TopupService implements TopupServiceInterface
+class TopUpService implements TopUpServiceInterface
 {
     /**
      * @inheritDoc
@@ -20,16 +20,16 @@ class TopupService implements TopupServiceInterface
     {
         DB::beginTransaction();
         try {
-            $siswa = Siswa::where('id', $siswaId)->lockForUpdate()->firstOrFail();
+            $student = Student::where('id', $siswaId)->lockForUpdate()->firstOrFail();
 
-            $status = TopupStatus::PENDING->value;
+            $status = TopUpStatus::PENDING->value;
             $path = null;
             $verifiedBy = null;
 
             if ($user->role === 'admin') {
-                $status = TopupStatus::BERHASIL->value;
-                $siswa->saldo_virtual += $data['nominal'];
-                $siswa->save();
+                $status = TopUpStatus::BERHASIL->value;
+                $student->saldo_virtual += $data['nominal'];
+                $student->save();
                 $verifiedBy = $user->id;
             } else {
                 if ($file) {
@@ -39,8 +39,8 @@ class TopupService implements TopupServiceInterface
                 }
             }
 
-            $topup = Topup::create([
-                'siswa_id' => $siswa->id,
+            $topUp = TopUp::create([
+                'student_id' => $student->id,
                 'nominal' => $data['nominal'],
                 'metode' => $data['metode'],
                 'catatan' => $data['catatan'] ?? null,
@@ -52,8 +52,8 @@ class TopupService implements TopupServiceInterface
             DB::commit();
 
             return [
-                'topup' => $topup,
-                'saldo_sekarang' => $siswa->saldo_virtual,
+                'topUp' => $topUp,
+                'saldo_sekarang' => $student->saldo_virtual,
                 'status' => $status
             ];
         } catch (Exception $e) {
@@ -73,26 +73,26 @@ class TopupService implements TopupServiceInterface
     {
         DB::beginTransaction();
         try {
-            $topup = Topup::where('id', $topupId)->lockForUpdate()->firstOrFail();
+            $topUp = TopUp::where('id', $topupId)->lockForUpdate()->firstOrFail();
 
-            if ($topup->status !== TopupStatus::PENDING->value) {
+            if ($topUp->status !== TopUpStatus::PENDING->value) {
                 throw new Exception('Top-up sudah diverifikasi sebelumnya', 400);
             }
 
-            $topup->status = $status;
-            $topup->verified_by = $adminUser->id;
-            $topup->save();
+            $topUp->status = $status;
+            $topUp->verified_by = $adminUser->id;
+            $topUp->save();
 
-            $siswa = Siswa::where('id', $topup->siswa_id)->lockForUpdate()->firstOrFail();
+            $student = Student::where('id', $topUp->student_id)->lockForUpdate()->firstOrFail();
 
             if ($status === TopupStatus::BERHASIL->value) {
-                $siswa->saldo_virtual += $topup->nominal;
-                $siswa->save();
+                $student->saldo_virtual += $topUp->nominal;
+                $student->save();
             }
 
             DB::commit();
 
-            return $topup;
+            return $topUp;
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('TopupService@verifyTopup failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);

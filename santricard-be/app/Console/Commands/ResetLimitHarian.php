@@ -14,7 +14,7 @@ class ResetLimitHarian extends Command
      */
     protected $signature = 'santricard:reset-limit-harian';
 
-    protected $description = 'Log bahwa limit harian siswa telah direset pada tengah malam. 
+    protected $description = 'Log bahwa limit harian student telah direset pada tengah malam. 
         Sistem menggunakan whereDate(today()) sehingga reset bersifat otomatis, 
         namun command ini memastikan konfirmasi eksplisit dan auditability.';
 
@@ -25,10 +25,10 @@ class ResetLimitHarian extends Command
         // Command ini dijalankan scheduler untuk konfirmasi eksplisit dan logging audit.
         
         $tanggal = now()->toDateString();
-        $jumlahSiswa = \App\Models\Siswa::where('aktif', true)->count();
+        $jumlahSiswa = \App\Models\Student::where('aktif', true)->count();
 
-        Log::info("SantriCard: Limit harian siswa direset otomatis untuk tanggal {$tanggal}. Total siswa aktif: {$jumlahSiswa}.");
+        Log::info("SantriCard: Limit harian student direset otomatis untuk tanggal {$tanggal}. Total student aktif: {$jumlahSiswa}.");
         
-        $this->info("✅ Limit harian untuk {$jumlahSiswa} siswa aktif telah direset untuk tanggal {$tanggal}.");
+        $this->info("✅ Limit harian untuk {$jumlahSiswa} student aktif telah direset untuk tanggal {$tanggal}.");
     }
 }

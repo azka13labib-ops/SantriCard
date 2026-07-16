@@ -7,20 +7,20 @@ import api from "@/lib/axios";
 
 interface TopupData {
   id: number;
-  siswa_id: number;
+  student_id: number;
   nominal: number;
   metode: string;
   status: string;
   bukti_transfer: string | null;
   created_at: string;
-  siswa: {
+  student: {
     nis: string;
     nama: string;
   };
 }
 
 export default function AdminTopupVerification() {
-  const [topups, setTopups] = useState<TopupData[]>([]);
+  const [top_ups, setTopups] = useState<TopupData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -28,8 +28,8 @@ export default function AdminTopupVerification() {
   const fetchTopups = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/topup");
-      setTopups(res.data);
+      const res = await api.get("/topUp");
+      setTopups(res.data.data || res.data);
     } catch (err) {
       console.error(err);
       setError("Gagal memuat data pengajuan top-up.");
@@ -48,7 +48,7 @@ export default function AdminTopupVerification() {
     if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
 
     try {
-      await api.post(`/topup/${id}/verifikasi`, { status });
+      await api.post(`/topUp/${id}/verifikasi`, { status });
       fetchTopups();
     } catch (err: unknown) {
       console.error(err);
@@ -102,15 +102,15 @@ export default function AdminTopupVerification() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {topups.length > 0 ? (
-                  topups.map((item) => (
+                {top_ups.length > 0 ? (
+                  top_ups.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50">
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                         {new Date(item.created_at).toLocaleString("id-ID")}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{item.siswa.nama}</div>
-                        <div className="text-sm text-gray-500">{item.siswa.nis}</div>
+                        <div className="text-sm font-medium text-gray-900">{item.student.nama}</div>
+                        <div className="text-sm text-gray-500">{item.student.nis}</div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
                         {formatRupiah(item.nominal)}

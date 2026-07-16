@@ -8,8 +8,8 @@ class Settlement extends Model
 {
     protected $guarded = ['id'];
 
-    public function pedagang()
+    public function merchant()
     {
-        return $this->belongsTo(Pedagang::class);
+        return $this->belongsTo(Merchant::class);
     }
 }

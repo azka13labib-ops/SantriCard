@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('settlements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pedagang_id')->constrained('pedagangs')->cascadeOnDelete();
+            $table->foreignId('merchant_id')->constrained('merchants')->cascadeOnDelete();
             $table->decimal('nominal', 10, 2);
             $table->enum('status', ['pending', 'selesai'])->default('pending');
             $table->foreignId('processed_by')->nullable()->constrained('users')->nullOnDelete();

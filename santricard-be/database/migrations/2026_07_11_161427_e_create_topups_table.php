@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('topups', function (Blueprint $table) {
+        Schema::create('top_ups', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
             $table->decimal('nominal', 10, 2);
             $table->enum('metode', ['qris_statis']);
             $table->enum('status', ['pending', 'berhasil', 'gagal'])->default('pending');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('topups');
+        Schema::dropIfExists('top_ups');
     }
 };

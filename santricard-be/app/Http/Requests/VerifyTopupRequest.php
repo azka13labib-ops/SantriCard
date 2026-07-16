@@ -5,9 +5,9 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use App\Enums\TopupStatus;
+use App\Enums\TopUpStatus;
 
-class VerifyTopupRequest extends FormRequest
+class VerifyTopUpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,8 @@ class VerifyTopupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|in:' . TopupStatus::BERHASIL->value . ',' . TopupStatus::GAGAL->value
+            'catatan' => 'nullable|string|max:255',
+            'status' => 'required|in:' . TopUpStatus::BERHASIL->value . ',' . TopUpStatus::GAGAL->value
         ];
     }
 

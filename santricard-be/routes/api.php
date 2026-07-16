@@ -4,13 +4,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TransaksiController;
-use App\Http\Controllers\SiswaController;
-use App\Http\Controllers\TopupController;
-use App\Http\Controllers\PedagangController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TopUpController;
+use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\OrtuController;
+use App\Http\Controllers\ParentController;
 
 // Auth Routes (Public)
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
@@ -19,35 +19,37 @@ Route::post('/auth/login', [AuthController::class, 'login'])->middleware('thrott
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
-        return $request->user()->load(['siswas', 'pedagang']);
+        return $request->user()->load(['students', 'merchant']);
     });
 
     // Admin Routes
     Route::middleware('role:admin')->group(function () {
-        // Daftar Ortu untuk form tambah siswa
-        Route::get('/users/ortu', [OrtuController::class, 'index']);
+        // Daftar Ortu untuk form tambah student
+        Route::get('/users/parent', [ParentController::class, 'index']);
         
         // Manajemen Ortu
-        Route::get('/ortu', [OrtuController::class, 'index']);
-        Route::post('/ortu', [OrtuController::class, 'store']);
-        Route::patch('/ortu/{id}', [OrtuController::class, 'update']);
-        Route::delete('/ortu/{id}', [OrtuController::class, 'destroy']);
+        Route::get('/parent', [ParentController::class, 'index']);
+        Route::post('/parent', [ParentController::class, 'store']);
+        Route::patch('/parent/{id}', [ParentController::class, 'update']);
+        Route::delete('/parent/{id}', [ParentController::class, 'destroy']);
 
-        // Siswa
-        Route::get('/siswa', [SiswaController::class, 'index']);
-        Route::post('/siswa', [SiswaController::class, 'store']);
-        Route::patch('/siswa/{id}', [SiswaController::class, 'update']);
-        Route::delete('/siswa/{id}', [SiswaController::class, 'destroy']);
+        // Student
+        Route::get('/student', [StudentController::class, 'index']);
+        Route::get('/student/export', [StudentController::class, 'exportExcel']);
+        Route::post('/student/import', [StudentController::class, 'importExcel']);
+        Route::post('/student', [StudentController::class, 'store']);
+        Route::patch('/student/{id}', [StudentController::class, 'update']);
+        Route::delete('/student/{id}', [StudentController::class, 'destroy']);
         
-        // Topup Admin Verification
-        Route::get('/topup', [TopupController::class, 'index']);
-        Route::post('/topup/{id}/verifikasi', [TopupController::class, 'verifikasi']);
+        // TopUp Admin Verification
+        Route::get('/topUp', [TopUpController::class, 'index']);
+        Route::post('/topUp/{id}/verifikasi', [TopUpController::class, 'verifikasi']);
         
-        // Pedagang
-        Route::get('/pedagang', [PedagangController::class, 'index']);
-        Route::post('/pedagang', [PedagangController::class, 'store']);
-        Route::patch('/pedagang/{id}', [PedagangController::class, 'update']);
-        Route::post('/pedagang/{id}/verifikasi', [PedagangController::class, 'verifikasi']);
+        // Merchant
+        Route::get('/merchant', [MerchantController::class, 'index']);
+        Route::post('/merchant', [MerchantController::class, 'store']);
+        Route::patch('/merchant/{id}', [MerchantController::class, 'update']);
+        Route::post('/merchant/{id}/verifikasi', [MerchantController::class, 'verifikasi']);
         
         // Settlement
         Route::get('/settlement', [SettlementController::class, 'index']);
@@ -57,28 +59,28 @@ Route::middleware('auth:sanctum')->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
         
-        // Transaksi Global
-        Route::get('/transaksi', [TransaksiController::class, 'index']);
+        // Transaction Global
+        Route::get('/transaction', [TransactionController::class, 'index']);
     });
 
     // Ortu & Admin Routes
-    Route::middleware('role:admin,ortu')->group(function () {
-        Route::get('/siswa/{id}', [SiswaController::class, 'show']);
-        Route::get('/siswa/{id}/saldo', [SiswaController::class, 'saldo']);
-        Route::get('/siswa/{id}/histori', [SiswaController::class, 'histori']);
+    Route::middleware('role:admin,parent')->group(function () {
+        Route::get('/student/{id}', [StudentController::class, 'show']);
+        Route::get('/student/{id}/saldo', [StudentController::class, 'saldo']);
+        Route::get('/student/{id}/histori', [StudentController::class, 'histori']);
         
-        // Topup
-        Route::post('/siswa/{id}/topup', [TopupController::class, 'store']);
-        Route::get('/siswa/{id}/topup', [TopupController::class, 'history']); // For checking topup status
+        // TopUp
+        Route::post('/student/{id}/topUp', [TopUpController::class, 'store']);
+        Route::get('/student/{id}/topUp', [TopUpController::class, 'history']); // For checking topUp status
     });
 
-    // Pedagang & Admin Routes
-    Route::middleware('role:admin,pedagang')->group(function () {
-        Route::get('/pedagang/{id}/penjualan', [PedagangController::class, 'penjualan']);
+    // Merchant & Admin Routes
+    Route::middleware('role:admin,merchant')->group(function () {
+        Route::get('/merchant/{id}/penjualan', [MerchantController::class, 'penjualan']);
     });
 
-    // Pedagang Routes (Only)
-    Route::middleware('role:pedagang')->group(function () {
-        Route::post('/transaksi', [TransaksiController::class, 'store'])->middleware('throttle:60,1');
+    // Merchant Routes (Only)
+    Route::middleware('role:merchant')->group(function () {
+        Route::post('/transaction', [TransactionController::class, 'store'])->middleware('throttle:60,1');
     });
 });

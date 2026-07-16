@@ -9,6 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // ── SantriCard Scheduler ──
-// Reset limit harian siswa — dijalankan tiap tengah malam
+// Reset limit harian student — dijalankan tiap tengah malam
 // Gunakan: php artisan schedule:run (via cron OS: "* * * * * php /path/artisan schedule:run")
 Schedule::command('santricard:reset-limit-harian')->dailyAt('00:00');

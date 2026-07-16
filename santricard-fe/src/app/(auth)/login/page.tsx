@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Cookies from "js-cookie";
-import { Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import { Lock, Mail, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 
@@ -12,6 +12,7 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -31,10 +32,10 @@ export default function Login() {
 
       if (user.role === "admin") {
         router.replace("/admin");
-      } else if (user.role === "pedagang") {
-        router.replace("/pedagang");
-      } else if (user.role === "ortu") {
-        router.replace("/ortu");
+      } else if (user.role === "merchant") {
+        router.replace("/merchant");
+      } else if (user.role === "parent") {
+        router.replace("/parent");
       } else {
         router.replace("/");
       }
@@ -129,13 +130,20 @@ export default function Login() {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:text-sm"
+                  className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-10 text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:text-sm"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-emerald-600 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 

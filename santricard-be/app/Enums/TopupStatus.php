@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum TopupStatus: string
+enum TopUpStatus: string
 {
     case PENDING = 'pending';
     case BERHASIL = 'berhasil';
