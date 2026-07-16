@@ -2,121 +2,90 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Siswa;
+use App\Contracts\TopupServiceInterface;
+use App\Http\Requests\StoreTopupRequest;
+use App\Http\Requests\VerifyTopupRequest;
+use App\Http\Resources\TopupResource;
 use App\Models\Topup;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
+use App\Traits\ApiResponse;
+use Exception;
+use Illuminate\Http\JsonResponse;
 
 class TopupController extends Controller
 {
-    public function index()
+    use ApiResponse;
+
+    protected TopupServiceInterface $topupService;
+
+    public function __construct(TopupServiceInterface $topupService)
     {
-        $topups = Topup::with('siswa:id,nama,nis')->orderBy('created_at', 'desc')->paginate(25);
-        return response()->json($topups);
+        $this->topupService = $topupService;
     }
 
-    public function history(string $siswa_id)
+    /**
+     * Get paginated topups.
+     */
+    public function index(): JsonResponse
+    {
+        $topups = Topup::with('siswa:id,nama,nis')->orderBy('created_at', 'desc')->paginate(25);
+        return response()->json($topups); // Bisa menggunakan return TopupResource::collection($topups) nantinya.
+    }
+
+    /**
+     * Get topup history for a specific siswa.
+     */
+    public function history(string $siswa_id): JsonResponse
     {
         $topups = Topup::where('siswa_id', $siswa_id)->orderBy('created_at', 'desc')->get();
         return response()->json($topups);
     }
 
-    public function store(Request $request, string $siswa_id)
+    /**
+     * Store a new topup request.
+     */
+    public function store(StoreTopupRequest $request, string $siswa_id): JsonResponse
     {
-        $request->validate([
-            'nominal' => 'required|numeric|min:1|max:10000000',
-            'metode' => 'required|string',
-            'catatan' => 'nullable|string',
-            'bukti_transfer' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120' // max 5MB
-        ]);
-
-        $user = $request->user();
-        
-        DB::beginTransaction();
         try {
-            $siswa = Siswa::where('id', $siswa_id)->lockForUpdate()->firstOrFail();
+            $result = $this->topupService->processTopup(
+                $siswa_id,
+                $request->validated(),
+                $request->user(),
+                $request->file('bukti_transfer')
+            );
 
-            $status = 'pending';
-            $path = null;
+            $message = $result['status'] === 'berhasil' 
+                ? 'Top-up berhasil' 
+                : 'Pengajuan top-up berhasil, menunggu verifikasi Admin.';
 
-            if ($user->role === 'admin') {
-                $status = 'berhasil';
-                $siswa->saldo_virtual += $request->nominal;
-                $siswa->save();
-            } else {
-                if ($request->hasFile('bukti_transfer')) {
-                    $path = $request->file('bukti_transfer')->store('bukti_transfer', 'public');
-                } else {
-                    return response()->json(['message' => 'Bukti transfer wajib diunggah'], 400);
-                }
-            }
+            return $this->successResponse([
+                'topup' => new TopupResource($result['topup']),
+                'saldo_sekarang' => $result['saldo_sekarang']
+            ], $message, 201);
 
-            $topup = Topup::create([
-                'siswa_id' => $siswa->id,
-                'nominal' => $request->nominal,
-                'metode' => $request->metode,
-                'catatan' => $request->catatan,
-                'status' => $status,
-                'bukti_transfer' => $path,
-                'verified_by' => $user->role === 'admin' ? $user->id : null
-            ]);
-
-            DB::commit();
-
-            return response()->json([
-                'message' => $status === 'berhasil' ? 'Top-up berhasil' : 'Pengajuan top-up berhasil, menunggu verifikasi Admin.',
-                'data' => $topup,
-                'saldo_sekarang' => $siswa->saldo_virtual
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('TopupController@store failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json([
-                'message' => 'Top-up gagal. Silakan coba lagi atau hubungi admin.'
-            ], 500);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
-    // ADMIN: Verifikasi topup pending
-    public function verifikasi(Request $request, string $id)
+    /**
+     * ADMIN: Verifikasi topup pending
+     */
+    public function verifikasi(VerifyTopupRequest $request, string $id): JsonResponse
     {
-        $request->validate([
-            'status' => 'required|in:berhasil,gagal'
-        ]);
-
-        DB::beginTransaction();
         try {
-            $topup = Topup::where('id', $id)->lockForUpdate()->firstOrFail();
+            $topup = $this->topupService->verifyTopup(
+                $id,
+                $request->validated('status'),
+                $request->user()
+            );
 
-            if ($topup->status !== 'pending') {
-                return response()->json(['message' => 'Top-up sudah diverifikasi sebelumnya'], 400);
-            }
+            return $this->successResponse(
+                new TopupResource($topup), 
+                'Verifikasi top-up tersimpan'
+            );
 
-            $topup->status = $request->status;
-            $topup->verified_by = $request->user()->id;
-            $topup->save();
-
-            $siswa = Siswa::where('id', $topup->siswa_id)->lockForUpdate()->firstOrFail();
-
-            if ($request->status === 'berhasil') {
-                $siswa->saldo_virtual += $topup->nominal;
-                $siswa->save();
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Verifikasi top-up tersimpan',
-                'data' => $topup
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('TopupController@verifikasi failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json([
-                'message' => 'Gagal memverifikasi. Silakan coba lagi.'
-            ], 500);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 }
