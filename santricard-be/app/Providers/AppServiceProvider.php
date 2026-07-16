@@ -24,5 +24,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::preventLazyLoading(! app()->isProduction());
+
+        // Konfigurasi Global Rate Limit (Mencegah DDoS)
+        // Maksimal 60 request per menit per IP untuk semua route API
+        \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Konfigurasi Rate Limit khusus Login (Mencegah Brute Force)
+        // Maksimal 5 percobaan per menit per IP
+        \Illuminate\Support\Facades\RateLimiter::for('login', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by($request->ip());
+        });
     }
 }

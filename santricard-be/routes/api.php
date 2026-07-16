@@ -13,7 +13,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrtuController;
 
 // Auth Routes (Public)
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
