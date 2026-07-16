@@ -52,7 +52,7 @@ export default function DashboardOrtu() {
   };
 
   useEffect(() => {
-    fetchData();
+    setTimeout(() => fetchData(), 0);
   }, []);
 
   const formatRupiah = (angka: number) => {

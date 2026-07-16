@@ -41,33 +41,17 @@ export default function PedagangScannerPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info' | 'offline', title: string, text: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
-  const [offlineQueue, setOfflineQueue] = useState<OfflineTransaction[]>([]);
+  const [isOnline, setIsOnline] = useState<boolean>(
+    () => typeof navigator !== "undefined" ? navigator.onLine : true
+  );
+  const [offlineQueue, setOfflineQueue] = useState<OfflineTransaction[]>(
+    () => loadOfflineQueue()
+  );
   const [isSyncing, setIsSyncing] = useState(false);
   
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
-  // ── Monitor status koneksi internet ──
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    setIsOnline(navigator.onLine);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  // ── Muat antrian offline dari localStorage saat mount ──
-  useEffect(() => {
-    setOfflineQueue(loadOfflineQueue());
-  }, []);
-
-  // ── Auto-sync saat koneksi kembali ──
+  // ── Auto-sync: proses antrian offline ──
   const syncOfflineQueue = useCallback(async () => {
     const queue = loadOfflineQueue();
     if (queue.length === 0 || isSyncing) return;
@@ -82,16 +66,13 @@ export default function PedagangScannerPage() {
           nominal: trx.nominal,
           idempotency_key: trx.id,
         });
-        // Hapus dari antrian jika berhasil
         remaining = remaining.filter(r => r.id !== trx.id);
         saveOfflineQueue(remaining);
       } catch (err: unknown) {
         if (axios.isAxiosError(err) && err.response?.status && err.response.status < 500) {
-          // Error validasi — hapus dari antrian agar tidak retry terus
           remaining = remaining.filter(r => r.id !== trx.id);
           saveOfflineQueue(remaining);
         }
-        // Error 5xx atau koneksi masih putus — biarkan di antrian
       }
     }
 
@@ -99,12 +80,20 @@ export default function PedagangScannerPage() {
     setIsSyncing(false);
   }, [isSyncing]);
 
+  // ── Monitor status koneksi internet ──
   useEffect(() => {
-    if (isOnline && offlineQueue.length > 0) {
-      syncOfflineQueue();
-    }
-  }, [isOnline, offlineQueue.length, syncOfflineQueue]);
-
+    const handleOnline = () => {
+      setIsOnline(true);
+      void syncOfflineQueue();
+    };
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [syncOfflineQueue]);
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",

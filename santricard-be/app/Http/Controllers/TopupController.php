@@ -11,21 +11,18 @@ use Illuminate\Support\Facades\Storage;
 
 class TopupController extends Controller
 {
-    // ADMIN: Lihat semua pengajuan topup
     public function index()
     {
         $topups = Topup::with('siswa:id,nama,nis')->orderBy('created_at', 'desc')->paginate(25);
         return response()->json($topups);
     }
 
-    // ORTU/ADMIN: Lihat histori topup untuk 1 siswa
     public function history(string $siswa_id)
     {
         $topups = Topup::where('siswa_id', $siswa_id)->orderBy('created_at', 'desc')->get();
         return response()->json($topups);
     }
 
-    // ORTU/ADMIN: Ajukan atau langsung topup
     public function store(Request $request, string $siswa_id)
     {
         $request->validate([

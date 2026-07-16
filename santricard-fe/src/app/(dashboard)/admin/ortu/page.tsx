@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Search, Loader2, Edit, Trash2 } from "lucide-react";
+import axios from "axios";
 import api from "@/lib/axios";
 
 import AddOrtuModal from "@/components/ui/AddOrtuModal";
@@ -39,7 +40,7 @@ export default function DataOrtu() {
   };
 
   useEffect(() => {
-    fetchOrtu();
+    setTimeout(() => fetchOrtu(), 0);
   }, []);
 
   const handleDelete = async () => {
@@ -49,9 +50,10 @@ export default function DataOrtu() {
       fetchOrtu();
       setIsDeleteModalOpen(false);
       setOrtuToDelete(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.response?.data?.message || "Gagal menghapus data.");
+      const msg = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
+      alert(msg || "Gagal menghapus data.");
       setIsDeleteModalOpen(false);
       setOrtuToDelete(null);
     }

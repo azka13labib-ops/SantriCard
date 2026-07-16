@@ -25,7 +25,7 @@ export default function OrtuLayout({ children }: { children: React.ReactNode }) 
       await api.post("/auth/logout");
       Cookies.remove("token");
       window.location.href = "/login";
-    } catch (err) {
+    } catch {
       Cookies.remove("token");
       window.location.href = "/login";
     } finally {

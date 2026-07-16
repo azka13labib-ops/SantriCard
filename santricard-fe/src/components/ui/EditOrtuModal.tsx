@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Loader2 } from "lucide-react";
+import { X } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 import ConfirmModal from "./ConfirmModal";
@@ -26,12 +26,14 @@ export default function EditOrtuModal({
 
   useEffect(() => {
     if (ortuData && isOpen) {
-      setFormData({
-        name: ortuData.name,
-        email: ortuData.email,
-        password: "" // Keep empty to not update password unless filled
-      });
-      setError("");
+      void (async () => {
+        setFormData({
+          name: ortuData.name,
+          email: ortuData.email,
+          password: ""
+        });
+        setError("");
+      })();
     }
   }, [ortuData, isOpen]);
 

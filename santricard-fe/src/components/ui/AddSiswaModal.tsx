@@ -17,18 +17,22 @@ export default function AddSiswaModal({ isOpen, onClose, onSiswaAdded }: { isOpe
   const [loadingOrtu, setLoadingOrtu] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+    void (async () => {
       setLoadingOrtu(true);
-      api.get('/users/ortu')
-        .then(res => {
-          setOrtuList(res.data);
-          if (res.data.length > 0 && !formData.ortu_id) {
-            setFormData(prev => ({ ...prev, ortu_id: res.data[0].id.toString() }));
-          }
-        })
-        .catch(err => console.error("Gagal memuat data orang tua", err))
-        .finally(() => setLoadingOrtu(false));
-    }
+      try {
+        const res = await api.get('/users/ortu');
+        setOrtuList(res.data);
+        if (res.data.length > 0 && !formData.ortu_id) {
+          setFormData(prev => ({ ...prev, ortu_id: res.data[0].id.toString() }));
+        }
+      } catch (err) {
+        console.error("Gagal memuat data orang tua", err);
+      } finally {
+        setLoadingOrtu(false);
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;

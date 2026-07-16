@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Upload, Loader2, CheckCircle2, Clock, XCircle, AlertCircle, QrCode } from "lucide-react";
+import axios from "axios";
 import api from "@/lib/axios";
 
 interface Siswa {
@@ -48,7 +49,7 @@ export default function OrtuTopupPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    setTimeout(() => fetchData(), 0);
   }, []);
 
 
@@ -99,9 +100,10 @@ export default function OrtuTopupPage() {
       setNominal("");
       setFile(null);
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setMessage({ type: "error", text: err.response?.data?.message || "Gagal mengirim pengajuan top-up." });
+      const msg = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
+      setMessage({ type: "error", text: msg || "Gagal mengirim pengajuan top-up." });
     } finally {
       setIsSubmitting(false);
     }
