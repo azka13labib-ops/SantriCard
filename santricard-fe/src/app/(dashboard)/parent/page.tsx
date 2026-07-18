@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/axios";
 import Cookies from "js-cookie";
+import { SkeletonCard, SkeletonList, SkeletonText } from "@/components/ui/skeleton";
 
 // â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -165,11 +166,27 @@ export default function DashboardOrtu() {
 
   const activeStudent = students.find((s) => s.id === selectedId);
 
-  // â”€â”€â”€ Loading state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ——— Loading state ————————————————————————————————————————————————————————————————————————————————
   if (loadingStudents) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-3">
+          <SkeletonText className="w-24" />
+          <div className="flex gap-2">
+            <SkeletonText className="h-10 w-32 rounded-xl" />
+            <SkeletonText className="h-10 w-32 rounded-xl" />
+          </div>
+        </div>
+        <div className="space-y-6 md:space-y-0 md:grid md:grid-cols-12 md:gap-6">
+          <div className="md:col-span-5 lg:col-span-4 space-y-6">
+            <SkeletonCard className="bg-emerald-600/50 border-none h-40" />
+            <SkeletonCard className="h-40" />
+          </div>
+          <div className="md:col-span-7 lg:col-span-8">
+            <SkeletonText className="w-48 mb-4 h-6" />
+            <SkeletonList items={5} className="bg-white border border-gray-100 rounded-2xl shadow-sm divide-y divide-gray-50" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -272,7 +289,7 @@ export default function DashboardOrtu() {
               </div>
               <div className="text-4xl font-bold mt-4 mb-1">
                 {loadingDetail
-                  ? <span className="text-emerald-200 text-2xl animate-pulse">Memuat...</span>
+                  ? <SkeletonText className="w-40 h-10 bg-emerald-700/50" />
                   : formatRupiah(saldoVirtual)
                 }
               </div>
@@ -289,10 +306,10 @@ export default function DashboardOrtu() {
             </div>
 
             {loadingDetail ? (
-              <div className="space-y-2 animate-pulse">
-                <div className="h-7 bg-gray-100 rounded w-2/3" />
-                <div className="h-2.5 bg-gray-100 rounded-full w-full" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
+              <div className="space-y-2">
+                <SkeletonText className="w-2/3 h-7" />
+                <SkeletonText className="w-full h-2.5 rounded-full" />
+                <SkeletonText className="w-1/2 h-3" />
               </div>
             ) : (
               <>
@@ -322,18 +339,7 @@ export default function DashboardOrtu() {
 
           <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50">
             {loadingDetail ? (
-              <div className="p-6 space-y-3 animate-pulse">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 shrink-0" />
-                    <div className="flex-1 space-y-1">
-                      <div className="h-4 bg-gray-100 rounded w-1/3" />
-                      <div className="h-3 bg-gray-100 rounded w-1/4" />
-                    </div>
-                    <div className="h-4 bg-gray-100 rounded w-1/5" />
-                  </div>
-                ))}
-              </div>
+              <SkeletonList items={4} className="divide-y divide-gray-50" />
             ) : histori.length > 0 ? (
               histori.map((trx) => (
                 <div key={trx.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">

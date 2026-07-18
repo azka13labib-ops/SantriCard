@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Receipt, Search, ArrowDownCircle } from "lucide-react";
+import { Receipt, Search, ArrowDownCircle } from "lucide-react";
 import api from "@/lib/axios";
+import { SkeletonCard, SkeletonList, SkeletonText } from "@/components/ui/skeleton";
 
 interface Transaction {
   id: number;
@@ -74,8 +75,18 @@ export default function PedagangHistoriPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      <div className="space-y-6 animate-in fade-in duration-300 max-w-2xl mx-auto">
+        <SkeletonCard className="bg-emerald-600/50 border-none h-40" />
+        <div>
+          <SkeletonText className="w-48 mb-3 h-6" />
+          <SkeletonText className="w-full h-11 mb-4 rounded-xl" />
+          <div className="space-y-6">
+            <div>
+              <SkeletonText className="w-32 h-4 mb-2" />
+              <SkeletonList items={3} className="bg-white border border-gray-100 rounded-2xl shadow-sm divide-y divide-gray-50" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

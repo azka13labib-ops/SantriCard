@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Loader2, Store } from "lucide-react";
+import { Plus, Search, Store } from "lucide-react";
 import api from "@/lib/axios";
 import AddMerchantModal from "@/components/ui/AddMerchantModal";
+import { SkeletonTable, SkeletonText } from "@/components/ui/skeleton";
 
 interface Merchant {
   id: number;
@@ -43,8 +44,20 @@ export default function DataKantin() {
 
   if (loading && merchants.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="space-y-6">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <div>
+            <SkeletonText className="w-48 h-8 mb-2" />
+            <SkeletonText className="w-64 h-4" />
+          </div>
+          <div className="mt-4 sm:ml-16 sm:mt-0">
+            <SkeletonText className="w-32 h-10 rounded-md" />
+          </div>
+        </div>
+        <SkeletonText className="w-full h-14 rounded-lg" />
+        <div className="p-4 bg-white rounded-lg shadow ring-1 ring-black ring-opacity-5">
+          <SkeletonTable columns={4} rows={5} className="border-none" />
+        </div>
       </div>
     );
   }
@@ -90,57 +103,101 @@ export default function DataKantin() {
       </div>
 
       <div className="overflow-hidden rounded-lg bg-white shadow ring-1 ring-black ring-opacity-5">
-        <table className="min-w-full divide-y divide-gray-300">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                Nama Kantin / Pemilik
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Lokasi
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Akun (Email)
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
-                Saldo Mengendap
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {merchants.map((merchant) => (
-              <tr key={merchant.id} className="hover:bg-gray-50">
-                <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
-                  <div className="flex items-center">
-                    <div className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <Store className="h-5 w-5 text-emerald-600" />
+        {merchants.length > 0 ? (
+          <>
+            {/* Mobile View (Cards) */}
+            <div className="block sm:hidden">
+              <ul role="list" className="divide-y divide-gray-200">
+                {merchants.map((merchant) => (
+                  <li key={merchant.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <Store className="h-5 w-5 text-emerald-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {merchant.nama_kantin}
+                        </p>
+                        <p className="text-sm text-gray-500 truncate">
+                          {merchant.user?.name}
+                        </p>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <div className="font-medium text-gray-900">{merchant.nama_kantin}</div>
-                      <div className="text-gray-500">{merchant.user?.name}</div>
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Lokasi</p>
+                        <p className="text-sm font-medium text-gray-900">{merchant.lokasi}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Saldo Mengendap</p>
+                        <p className="text-sm font-medium text-emerald-600">Rp {merchant.saldo_mengendap.toLocaleString('id-ID')}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-xs text-gray-500">Akun (Email)</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{merchant.user?.email}</p>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {merchant.lokasi}
-                </td>
-                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {merchant.user?.email}
-                </td>
-                <td className="whitespace-nowrap px-3 py-4 text-sm text-right font-medium text-gray-900">
-                  Rp {merchant.saldo_mengendap.toLocaleString('id-ID')}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        
-        {merchants.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <Store className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">Belum ada data kantin</h3>
-            <p className="mt-1 text-sm text-gray-500">Mulai dengan menambahkan kantin baru.</p>
-          </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Desktop View (Table) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      Nama Kantin / Pemilik
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Lokasi
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Akun (Email)
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
+                      Saldo Mengendap
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {merchants.map((merchant) => (
+                    <tr key={merchant.id} className="hover:bg-gray-50">
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 shrink-0 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <Store className="h-5 w-5 text-emerald-600" />
+                          </div>
+                          <div className="ml-4">
+                            <div className="font-medium text-gray-900">{merchant.nama_kantin}</div>
+                            <div className="text-gray-500">{merchant.user?.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {merchant.lokasi}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {merchant.user?.email}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-right font-medium text-gray-900">
+                        Rp {merchant.saldo_mengendap.toLocaleString('id-ID')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        ) : (
+          !loading && (
+            <div className="text-center py-12">
+              <Store className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">Belum ada data kantin</h3>
+              <p className="mt-1 text-sm text-gray-500">Mulai dengan menambahkan kantin baru.</p>
+            </div>
+          )
         )}
       </div>
 

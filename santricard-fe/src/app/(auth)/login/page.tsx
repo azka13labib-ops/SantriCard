@@ -46,6 +46,8 @@ export default function Login() {
           setError(error.response.data.message || "Validasi gagal. Cek email dan password Anda.");
         } else if (error.response?.status === 401) {
           setError("Email atau Password salah!");
+        } else if (error.response?.status === 429) {
+          setError("Terlalu banyak percobaan login. Silakan tunggu beberapa saat lalu coba lagi.");
         } else {
           setError("Terjadi kesalahan sistem. Silakan coba lagi nanti.");
         }

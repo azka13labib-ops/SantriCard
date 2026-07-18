@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Store, Wallet, ArrowUpRight, Loader2 } from "lucide-react";
+import { Users, Store, Wallet, ArrowUpRight } from "lucide-react";
 import api from "@/lib/axios";
+import { SkeletonKpiCard, SkeletonTable, SkeletonText } from "@/components/ui/skeleton";
 
 interface DashboardData {
   student: { total: number; aktif: number; saldo_beredar: number };
@@ -41,8 +42,23 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      <div className="space-y-6">
+        <div className="w-full">
+          <SkeletonText className="w-48 h-8 mb-2" />
+          <SkeletonText className="w-full max-w-sm h-4" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <SkeletonKpiCard />
+          <SkeletonKpiCard />
+          <SkeletonKpiCard />
+          <SkeletonKpiCard />
+        </div>
+        <div className="mt-8 rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-200 px-6 py-5">
+            <SkeletonText className="w-40 h-6" />
+          </div>
+          <SkeletonTable columns={6} rows={5} className="border-none shadow-none rounded-none" />
+        </div>
       </div>
     );
   }
@@ -95,9 +111,9 @@ export default function AdminDashboard() {
               </div>
               <p className="ml-16 truncate text-sm font-medium text-gray-500">{item.title}</p>
             </dt>
-            <dd className="ml-16 flex items-baseline pb-1">
-              <p className="text-2xl font-semibold text-gray-900">{item.value}</p>
-              <p className="ml-2 flex items-baseline text-sm font-semibold text-emerald-600">
+            <dd className="ml-16 flex flex-wrap items-baseline gap-x-2 pb-1">
+              <p className="text-2xl font-semibold text-gray-900 break-all">{item.value}</p>
+              <p className="flex items-baseline text-sm font-semibold text-emerald-600">
                 <span className="sr-only"> Detail: </span>
                 {item.trend}
               </p>
@@ -111,33 +127,33 @@ export default function AdminDashboard() {
         <div className="border-b border-gray-200 px-6 py-5">
           <h3 className="text-base font-semibold leading-6 text-gray-900">Transaction Terkini</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  ID Transaction
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Student
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Kantin
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Nominal
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Waktu
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {data.transaksi_terakhir && data.transaksi_terakhir.length > 0 ? (
-                data.transaksi_terakhir.map((trx) => (
+        {data.transaksi_terakhir && data.transaksi_terakhir.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    ID Transaction
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Student
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Kantin
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Nominal
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Waktu
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {data.transaksi_terakhir.map((trx) => (
                   <tr key={trx.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">TRX-{trx.id}</td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{trx.student?.nama || '-'}</td>
@@ -158,17 +174,15 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                    Belum ada transaction
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <p className="text-sm text-gray-500">Belum ada transaction terkini</p>
+          </div>
+        )}
       </div>
     </div>
   );

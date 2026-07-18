@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Search, Loader2, Edit, Trash2, X, Users } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
+import { SkeletonTable, SkeletonText } from "@/components/ui/skeleton";
 
 import AddParentModal from "@/components/ui/AddParentModal";
 import EditParentModal from "@/components/ui/EditParentModal";
@@ -98,8 +99,20 @@ export default function DataOrtu() {
 
   if (loading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <SkeletonText className="w-48 h-8 mb-2" />
+            <SkeletonText className="w-64 h-4" />
+          </div>
+          <SkeletonText className="w-32 h-10 rounded-lg" />
+        </div>
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-200 bg-gray-50/50 p-4">
+            <SkeletonText className="w-64 h-10 rounded-lg" />
+          </div>
+          <SkeletonTable columns={4} rows={6} className="border-none" />
+        </div>
       </div>
     );
   }

@@ -7,6 +7,7 @@ import axios from "axios";
 import api from "@/lib/axios";
 
 interface OfflineTransaction {
+  id: string;
   kode_kartu: string;
   nominal: number;
   timestamp: number;

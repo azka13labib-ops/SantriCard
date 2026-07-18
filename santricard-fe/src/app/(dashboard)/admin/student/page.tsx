@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Loader2, Edit, Trash2, QrCode, Download, Upload } from "lucide-react";
+import { Plus, Search, Edit, Trash2, QrCode, Download, Upload } from "lucide-react";
 import api from "@/lib/axios";
+import { SkeletonTable } from "@/components/ui/skeleton";
 
 import AddStudentModal from "@/components/ui/AddStudentModal";
 import EditStudentModal from "@/components/ui/EditStudentModal";
@@ -71,7 +72,7 @@ export default function DataSiswa() {
       <div className="sm:flex sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">Data Student</h1>
-          <p className="text-sm text-gray-500">Kelola data santri, limit harian, dan card RFID mereka.</p>
+          <p className="text-sm text-gray-500 max-w-xl">Kelola data santri, limit harian, dan card RFID mereka.</p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex sm:flex-none gap-3">
           <button
@@ -123,8 +124,8 @@ export default function DataSiswa() {
         </div>
         
         {loading ? (
-          <div className="flex h-48 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <div className="p-6">
+            <SkeletonTable columns={6} rows={6} className="border-none" />
           </div>
         ) : (
           <div className="overflow-x-auto">
