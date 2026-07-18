@@ -2,7 +2,9 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api', // Disesuaikan dengan URL Laravel
+  // SEC-05: URL dikontrol oleh environment variable, bukan hard-coded.
+  // Set NEXT_PUBLIC_API_URL=https://api.domain.com/api di production.
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

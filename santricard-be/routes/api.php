@@ -16,7 +16,7 @@ use App\Http\Controllers\ParentController;
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
 // Protected Routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user()->load(['students', 'merchant']);
@@ -72,6 +72,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // TopUp
         Route::post('/student/{id}/topUp', [TopUpController::class, 'store']);
         Route::get('/student/{id}/topUp', [TopUpController::class, 'history']); // For checking topUp status
+        
+        // Download bukti transfer dari private storage (SEC-07)
+        Route::get('/topUp/{id}/bukti', [TopUpController::class, 'downloadBukti']);
     });
 
     // Merchant & Admin Routes

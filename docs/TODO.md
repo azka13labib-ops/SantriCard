@@ -53,12 +53,12 @@ Gunakan file ini untuk melacak *progress* (perkembangan) Anda. Ubah `[ ]` menjad
 - [ ] Daftarkan command tersebut di `app/Console/Kernel.php` agar jalan setiap jam 00:00 (otomatisasi *refresh* limit harian)
 
 ## Tahap 7: Frontend Web Apps (Next.js + Tailwind + Axios)
-- [ ] Setup project Frontend (`pnpm create next-app@latest`)
-- [ ] Install Axios (`pnpm add axios`) dan konfigurasi interceptors (untuk Bearer Token)
-- [ ] Buat **Halaman Login** (Semua Role)
-- [ ] Buat **Dashboard Admin** (Kelola Siswa, Top-Up, Pedagang, Settlement)
-- [ ] Buat **Halaman Kasir Pedagang** (Tampilan untuk kamera HP scan QR Code & Input Nominal)
-- [ ] Buat **Halaman Monitoring Orang Tua** (Tampilan sisa saldo & list histori jajan)
+- [x] Setup project Frontend (`pnpm create next-app@latest`)
+- [x] Install Axios (`pnpm add axios`) dan konfigurasi interceptors (untuk Bearer Token)
+- [x] Buat **Halaman Login** (Semua Role)
+- [x] Buat **Dashboard Admin** (Kelola Siswa, Top-Up, Pedagang, Settlement)
+- [x] Buat **Halaman Kasir Pedagang** (Tampilan untuk kamera HP scan QR Code & Input Nominal)
+- [x] Buat **Halaman Monitoring Orang Tua** (Tampilan sisa saldo & list histori jajan)
 
 ## Tahap 8: Pengujian (Testing)
 *(Referensi: `docs/testing/test-cases.md`)*

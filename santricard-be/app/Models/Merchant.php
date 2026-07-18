@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Merchant extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'nama_kantin',
+        'lokasi',
+        'saldo_mengendap',
+        'terverifikasi',
+    ];
 
     public function user()
     {

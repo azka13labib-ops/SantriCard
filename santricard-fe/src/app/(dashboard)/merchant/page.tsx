@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { CreditCard, QrCode, Zap, CheckCircle2, XCircle, AlertCircle, Loader2, WifiOff, Clock } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 
-// ── Tipe untuk antrian transaction offline ──
 interface OfflineTransaction {
-  id: string; // UUID sebagai idempotency_key
   kode_kartu: string;
   nominal: number;
   timestamp: number;
@@ -29,11 +27,10 @@ function saveOfflineQueue(queue: OfflineTransaction[]) {
   localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
 }
 
+// SEC-16: Gunakan crypto.randomUUID() yang aman secara kriptografis
+// (CSPRNG, tidak bisa diprediksi seperti Math.random())
 function generateUUID(): string {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
-  });
+  return crypto.randomUUID();
 }
 
 export default function PedagangScannerPage() {
@@ -41,12 +38,8 @@ export default function PedagangScannerPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info' | 'offline', title: string, text: string} | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isOnline, setIsOnline] = useState<boolean>(
-    () => typeof navigator !== "undefined" ? navigator.onLine : true
-  );
-  const [offlineQueue, setOfflineQueue] = useState<OfflineTransaction[]>(
-    () => loadOfflineQueue()
-  );
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [offlineQueue, setOfflineQueue] = useState<OfflineTransaction[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -87,6 +80,7 @@ export default function PedagangScannerPage() {
       void syncOfflineQueue();
     };
     const handleOffline = () => setIsOnline(false);
+
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     return () => {
@@ -114,7 +108,7 @@ export default function PedagangScannerPage() {
     
     setTimeout(async () => {
       try {
-        scannerRef.current = new Html5Qrcode("reader");
+        scannerRef.current = new Html5Qrcode("reader", { formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ], verbose: false });
         await scannerRef.current.start(
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 250, height: 250 } },

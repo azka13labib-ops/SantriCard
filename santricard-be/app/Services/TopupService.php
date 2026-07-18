@@ -33,7 +33,7 @@ class TopUpService implements TopUpServiceInterface
                 $verifiedBy = $user->id;
             } else {
                 if ($file) {
-                    $path = $file->store('bukti_transfer', 'public');
+                    $path = $file->store('bukti_transfer', 'local');
                 } else {
                     throw new Exception('Bukti transfer wajib diunggah', 400);
                 }

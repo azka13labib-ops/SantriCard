@@ -78,7 +78,19 @@ class MerchantController extends Controller
 
     public function penjualan(string $id)
     {
-        $merchant = Merchant::findOrFail($id);
+        $user = request()->user();
+
+        // Merchant hanya boleh melihat data penjualannya sendiri.
+        // ID dari URL diabaikan untuk role merchant — selalu gunakan merchant milik user login.
+        if ($user->role === 'merchant') {
+            $merchant = $user->merchant;
+            if (!$merchant) {
+                return response()->json(['message' => 'Akun merchant tidak ditemukan.'], 404);
+            }
+        } else {
+            // Admin boleh mengakses berdasarkan ID dari URL
+            $merchant = Merchant::findOrFail($id);
+        }
         
         $transactions = $merchant->transactions()->with('student:id,nama')
             ->where('created_at', '>=', now()->subDays(30))

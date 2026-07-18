@@ -10,6 +10,11 @@ class MerchantSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command->warn('MerchantSeeder: Dilewati di environment production.');
+            return;
+        }
+
         $pedagangUser = User::factory()->create([
             'name' => 'Ibu Siti',
             'email' => 'kantin@santricard.com',

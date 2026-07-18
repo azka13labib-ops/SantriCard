@@ -11,6 +11,11 @@ class ParentStudentSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command->warn('ParentStudentSeeder: Dilewati di environment production.');
+            return;
+        }
+
         $parent = User::factory()->create([
             'name' => 'Bapak Ahmad',
             'email' => 'parent@santricard.com',

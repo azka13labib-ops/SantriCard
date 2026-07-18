@@ -29,7 +29,7 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
             'Virtual Balance',
             'Daily Limit',
             'Status',
-            'RFID Card UID'
+            // SEC-03: RFID Card UID dihapus dari ekspor default (data credential sensitif)
         ];
     }
 
@@ -45,7 +45,7 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
             $student->saldo_virtual,
             $student->limit_harian,
             $student->aktif ? 'Aktif' : 'Non-Aktif',
-            $student->card ? $student->card->uid_rfid : ''
+            // RFID UID tidak disertakan
         ];
     }
 }

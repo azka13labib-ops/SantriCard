@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Merchant;
 use App\Models\Settlement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SettlementController extends Controller
 {
@@ -34,12 +35,13 @@ class SettlementController extends Controller
 
             $nominalDicairkan = $merchant->saldo_mengendap;
 
-            // Catat settlement
+            // Catat settlement dengan actor admin (SEC-09)
             $settlement = Settlement::create([
-                'merchant_id' => $merchant->id,
-                'nominal' => $nominalDicairkan,
-                'catatan' => $request->catatan,
-                'status' => 'berhasil'
+                'merchant_id'  => $merchant->id,
+                'nominal'      => $nominalDicairkan,
+                'catatan'      => $request->catatan,
+                'status'       => 'berhasil',
+                'processed_by' => $request->user()->id,
             ]);
 
             // Nolkan saldo mengendap
@@ -54,7 +56,9 @@ class SettlementController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Gagal melakukan pencairan', 'error' => $e->getMessage()], 500);
+            // SEC-11: Hanya log detail ke server, jangan bocorkan ke client
+            Log::error('SettlementController@store failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Gagal melakukan pencairan. Silakan coba lagi.'], 500);
         }
     }
 

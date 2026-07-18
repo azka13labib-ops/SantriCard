@@ -88,9 +88,9 @@ export default function QRCodeModal({ isOpen, onClose, siswaData }: QRCodeModalP
               <div className="bg-white p-3 rounded-2xl shadow-lg border border-gray-100">
                 <QRCodeSVG 
                   value={siswaData.card.qr_code_hash} 
-                  size={150}
-                  level="H"
-                  includeMargin={true}
+                  size={200}
+                  level="M"
+                  includeMargin={false}
                 />
               </div>
             </div>

@@ -20,6 +20,11 @@ class AuthController extends Controller
         }
 
         $user = \App\Models\User::where('email', $request->email)->firstOrFail();
+        
+        // SEC-04: Revoke semua token lama sebelum membuat token baru
+        // Ini memastikan hanya satu sesi aktif per login
+        $user->tokens()->delete();
+        
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

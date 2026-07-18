@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Student extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'parent_id',
+        'nis',
+        'nama',
+        'kelas',
+        'saldo_virtual',
+        'limit_harian',
+        'aktif',
+    ];
     // Catatan: 'sisa_limit_hari_ini' TIDAK dimasukkan ke $appends untuk menghindari
     // N+1 query saat endpoint index() dipanggil. Accessor ini digunakan secara eksplisit
     // hanya di endpoint saldo() dan saat transaction diproses.

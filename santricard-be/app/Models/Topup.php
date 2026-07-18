@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class TopUp extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'student_id',
+        'nominal',
+        'metode',
+        'catatan',
+        'status',
+        'bukti_transfer',
+        'verified_by',
+    ];
 
     public function student()
     {

@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Settlement extends Model
 {
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'merchant_id',
+        'nominal',
+        'catatan',
+        'status',
+        'processed_by',
+    ];
 
     public function merchant()
     {
