@@ -45,7 +45,7 @@ export default function Login() {
         if (error.response?.status === 422) {
           setError(error.response.data.message || "Validasi gagal. Cek email dan password Anda.");
         } else if (error.response?.status === 401) {
-          setError("Email atau Password salah!");
+          setError(error.response.data.message || "Email atau Password salah!");
         } else if (error.response?.status === 429) {
           setError("Terlalu banyak percobaan login. Silakan tunggu beberapa saat lalu coba lagi.");
         } else {
@@ -118,7 +118,7 @@ export default function Login() {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:text-sm"
-                  placeholder="admin@santricard.com atau 123456789"
+                  placeholder="admin@santricard.com atau NISN"
                 />
               </div>
             </div>

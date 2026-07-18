@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, WalletCards } from "lucide-react";
+import { LayoutDashboard, WalletCards, Settings } from "lucide-react";
 
 export default function SidebarParent() {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ export default function SidebarParent() {
   const navItems = [
     { name: "Monitoring Anak", icon: LayoutDashboard, href: "/parent" },
     { name: "Isi Saldo", icon: WalletCards, href: "/parent/topUp" },
+    { name: "Pengaturan", icon: Settings, href: "/parent/settings" },
   ];
 
   return (

@@ -90,78 +90,144 @@ export default function AdminTopupVerification() {
             <SkeletonTable columns={6} rows={5} className="border-none" />
           </div>
         ) : top_ups.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Waktu</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Santri</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nominal</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Metode</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+          <>
+            {/* Mobile View (Cards) */}
+            <div className="block sm:hidden">
+              <ul role="list" className="divide-y divide-gray-200">
                 {top_ups.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {new Date(item.created_at).toLocaleString("id-ID")}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{item.student.nama}</div>
-                      <div className="text-sm text-gray-500">{item.student.nis}</div>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
-                      {formatRupiah(item.nominal)}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      <span className="capitalize">{item.metode.replace('_', ' ')}</span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
+                  <li key={item.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-gray-900">{new Date(item.created_at).toLocaleDateString("id-ID")}</p>
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        item.status === 'pending'  ? 'badge-pending' :
-                        item.status === 'berhasil' ? 'badge-success' : 'badge-error'
+                        item.status === 'pending'  ? 'bg-yellow-100 text-yellow-800' :
+                        item.status === 'berhasil' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
                         {item.status === 'pending' ? 'Menunggu' : item.status === 'berhasil' ? 'Berhasil' : 'Ditolak'}
                       </span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                      <div className="flex justify-end gap-2 items-center">
-                        {item.bukti_transfer && (
-                          <button
-                            onClick={() => setSelectedImage(`http://localhost:8000/storage/${item.bukti_transfer}`)}
-                            className="text-emerald-700 hover:text-emerald-900 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded font-medium text-xs"
-                          >
-                            <Eye className="w-4 h-4" /> Bukti
-                          </button>
-                        )}
-                        
-                        {item.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleVerify(item.id, 'berhasil')}
-                              className="text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded flex items-center gap-1"
-                              title="Terima"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleVerify(item.id, 'gagal')}
-                              className="text-white bg-red-600 hover:bg-red-700 px-2 py-1 rounded flex items-center gap-1"
-                              title="Tolak"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Santri</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{item.student.nama}</p>
+                        <p className="text-xs text-gray-500">{item.student.nis}</p>
                       </div>
-                    </td>
-                  </tr>
+                      <div>
+                        <p className="text-xs text-gray-500">Metode</p>
+                        <p className="text-sm font-medium text-gray-900 capitalize">{item.metode.replace('_', ' ')}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-xs text-gray-500">Nominal</p>
+                        <p className="text-lg font-bold text-gray-900">
+                          {formatRupiah(item.nominal)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 items-center border-t border-gray-100 pt-3 mt-2">
+                      {item.bukti_transfer && (
+                        <button
+                          onClick={() => setSelectedImage(`http://localhost:8000/storage/${item.bukti_transfer}`)}
+                          className="text-emerald-700 hover:text-emerald-900 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded font-medium text-xs"
+                        >
+                          <Eye className="w-4 h-4" /> Bukti
+                        </button>
+                      )}
+                      
+                      {item.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleVerify(item.id, 'berhasil')}
+                            className="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded flex items-center gap-1 text-sm font-medium"
+                          >
+                            <Check className="w-4 h-4" /> Terima
+                          </button>
+                          <button
+                            onClick={() => handleVerify(item.id, 'gagal')}
+                            className="text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded flex items-center gap-1 text-sm font-medium"
+                          >
+                            <X className="w-4 h-4" /> Tolak
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+            </div>
+
+            {/* Desktop View (Table) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Waktu</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Santri</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nominal</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Metode</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {top_ups.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                        {new Date(item.created_at).toLocaleString("id-ID")}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">{item.student.nama}</div>
+                        <div className="text-sm text-gray-500">{item.student.nis}</div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-gray-900">
+                        {formatRupiah(item.nominal)}
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                        <span className="capitalize">{item.metode.replace('_', ' ')}</span>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          item.status === 'pending'  ? 'badge-pending' :
+                          item.status === 'berhasil' ? 'badge-success' : 'badge-error'
+                        }`}>
+                          {item.status === 'pending' ? 'Menunggu' : item.status === 'berhasil' ? 'Berhasil' : 'Ditolak'}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                        <div className="flex justify-end gap-2 items-center">
+                          {item.bukti_transfer && (
+                            <button
+                              onClick={() => setSelectedImage(`http://localhost:8000/storage/${item.bukti_transfer}`)}
+                              className="text-emerald-700 hover:text-emerald-900 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded font-medium text-xs"
+                            >
+                              <Eye className="w-4 h-4" /> Bukti
+                            </button>
+                          )}
+                          
+                          {item.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleVerify(item.id, 'berhasil')}
+                                className="text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded flex items-center gap-1"
+                                title="Terima"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleVerify(item.id, 'gagal')}
+                                className="text-white bg-red-600 hover:bg-red-700 px-2 py-1 rounded flex items-center gap-1"
+                                title="Tolak"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
             <p className="text-sm text-gray-500">Belum ada data pengajuan top-up.</p>

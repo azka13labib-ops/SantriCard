@@ -87,60 +87,105 @@ export default function TransaksiGlobal() {
 
       <div className="overflow-hidden rounded-lg bg-white shadow ring-1 ring-black ring-opacity-5">
         {transactions.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                    ID Transaction
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Waktu
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Santri (Pembeli)
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Kantin (Tujuan)
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
-                    Nominal
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+          <>
+            {/* Mobile View (Cards) */}
+            <div className="block sm:hidden">
+              <ul role="list" className="divide-y divide-gray-200">
                 {transactions.map((trx) => (
-                  <tr key={trx.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                      TRX-{trx.id}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {new Date(trx.created_at).toLocaleString('id-ID')}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                      {trx.student?.nama || '-'}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {trx.merchant?.nama_kantin || '-'}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-right text-gray-900">
-                      Rp {trx.nominal.toLocaleString('id-ID')}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
-                      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        trx.status === 'berhasil' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                      }`}>
+                  <li key={trx.id} className="p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium text-gray-900">TRX-{trx.id}</p>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          trx.status === "berhasil" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                        }`}
+                      >
                         {trx.status}
                       </span>
-                    </td>
-                  </tr>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Santri (Pembeli)</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{trx.student?.nama || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Kantin (Tujuan)</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{trx.merchant?.nama_kantin || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Nominal</p>
+                        <p className="text-sm font-bold text-gray-900">
+                          Rp {trx.nominal.toLocaleString('id-ID')}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Waktu</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {new Date(trx.created_at).toLocaleString('id-ID')}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+            </div>
+
+            {/* Desktop View (Table) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-300">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      ID Transaction
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Waktu
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Santri (Pembeli)
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Kantin (Tujuan)
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">
+                      Nominal
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {transactions.map((trx) => (
+                    <tr key={trx.id} className="hover:bg-gray-50">
+                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                        TRX-{trx.id}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {new Date(trx.created_at).toLocaleString('id-ID')}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                        {trx.student?.nama || '-'}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {trx.merchant?.nama_kantin || '-'}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-right text-gray-900">
+                        Rp {trx.nominal.toLocaleString('id-ID')}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-center">
+                        <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          trx.status === 'berhasil' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {trx.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           !loading && (
             <div className="text-center py-12">

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Loader2, Wallet, History, AlertCircle, CheckCircle2,
-  Lock, X, Users, ChevronRight,
+  Lock, X, Users, ChevronRight, Eye, EyeOff,
 } from "lucide-react";
 import api from "@/lib/axios";
 import Cookies from "js-cookie";
@@ -55,33 +55,38 @@ function getInitials(nama: string) {
     .toUpperCase();
 }
 
-// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ——— Component ————————————————————————————————————————————————————————————————————————————————————
 
 export default function DashboardOrtu() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // â”€â”€ Global state â”€â”€
+  // ——— Global state ———
   const [students, setStudents] = useState<StudentSummary[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  // â”€â”€ Per-student state â”€â”€
+  // ——— Per-student state ———
   const [saldo, setSaldo] = useState<SaldoData | null>(null);
   const [histori, setHistori] = useState<Transaction[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  // â”€â”€ Account setup state â”€â”€
-  const [perluSetup, setPerluSetup] = useState(false);
+  // ——— Account setup state ———
+  const [perluSetup, setPerluSetup] = useState(() => {
+    if (typeof window !== "undefined") {
+      return Cookies.get("perlu_setup_akun") === "true";
+    }
+    return false;
+  });
   const [showSetupModal, setShowSetupModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
   const [setupError, setSetupError] = useState("");
 
-  // â”€â”€â”€ Step 1: fetch list of students â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ——— Step 1: fetch list of students ——————————————————————————————————————————————————————————
   useEffect(() => {
-    if (Cookies.get("perlu_setup_akun") === "true") setPerluSetup(true);
-
     const init = async () => {
       try {
         const res = await api.get("/user");
@@ -106,7 +111,7 @@ export default function DashboardOrtu() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // â”€â”€â”€ Step 2: fetch detail whenever selected student changes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ——— Step 2: fetch detail whenever selected student changes —————————————————————————————————
   const fetchDetail = useCallback(async (id: number) => {
     setLoadingDetail(true);
     setSaldo(null);
@@ -131,7 +136,11 @@ export default function DashboardOrtu() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("siswa_id", String(selectedId));
     router.replace(`?${params.toString()}`, { scroll: false });
-    fetchDetail(selectedId);
+    
+    // Defer the fetch to avoid cascading renders warning
+    setTimeout(() => {
+      fetchDetail(selectedId);
+    }, 0);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);
 
@@ -139,6 +148,7 @@ export default function DashboardOrtu() {
   const handleSetupPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword.length < 6) { setSetupError("Password minimal 6 karakter"); return; }
+    if (newPassword !== newPasswordConfirm) { setSetupError("Konfirmasi password tidak cocok!"); return; }
     setSetupLoading(true);
     setSetupError("");
     try {
@@ -408,13 +418,34 @@ export default function DashboardOrtu() {
             <form onSubmit={handleSetupPassword} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                    placeholder="Minimal 6 karakter"
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-emerald-600 focus:outline-none"
+                  >
+                    {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
                 <input
                   type="password"
                   required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  value={newPasswordConfirm}
+                  onChange={(e) => setNewPasswordConfirm(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
-                  placeholder="Minimal 6 karakter"
+                  placeholder="Ketik ulang password"
                   minLength={6}
                 />
               </div>
