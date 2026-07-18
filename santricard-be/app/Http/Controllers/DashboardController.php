@@ -33,6 +33,20 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Data untuk Chart (7 hari terakhir)
+        $chartData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = \Carbon\Carbon::today()->subDays($i);
+            $dailyTransactions = Transaction::whereDate('created_at', $date)
+                ->where('status', 'berhasil')
+                ->sum('nominal');
+            
+            $chartData[] = [
+                'name' => $date->format('D'), // Misal: Mon, Tue
+                'total' => $dailyTransactions
+            ];
+        }
+
         return response()->json([
             'transaksi_hari_ini' => [
                 'total' => $totalTransaksi,
@@ -49,7 +63,8 @@ class DashboardController extends Controller
                 'total' => $totalPedagang,
                 'aktif' => $pedagangAktif
             ],
-            'transaksi_terakhir' => $transaksiTerakhir
+            'transaksi_terakhir' => $transaksiTerakhir,
+            'chart_data' => $chartData
         ]);
     }
 }

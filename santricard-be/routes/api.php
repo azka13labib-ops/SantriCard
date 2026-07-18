@@ -22,6 +22,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user()->load(['students', 'merchant']);
     });
+    Route::patch('/user', [AuthController::class, 'updateProfile']);
 
     // Admin Routes
     Route::middleware('role:admin')->group(function () {

@@ -17,23 +17,24 @@ class AuthController extends Controller
 
         if (!$isEmail) {
             // NISN login
-            if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts('login-nisn:'.$request->ip(), 10)) {
-                return response()->json(['message' => 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'], 429);
-            }
-            \Illuminate\Support\Facades\RateLimiter::hit('login-nisn:'.$request->ip());
-
             $student = \App\Models\Student::where('nis', $identifier)->first();
             if (!$student || !$student->parent_id) {
                 return response()->json(['message' => 'NISN tidak ditemukan atau tidak memiliki akun orang tua terkait.'], 401);
             }
 
             $user = \App\Models\User::find($student->parent_id);
-            if (!$user || $user->perlu_setup_akun == false) {
-                return response()->json(['message' => 'Silakan login menggunakan email dan password.'], 401);
+            if (!$user) {
+                return response()->json(['message' => 'Akun orang tua tidak ditemukan.'], 401);
             }
 
-            // Valid, clear rate limiter
-            \Illuminate\Support\Facades\RateLimiter::clear('login-nisn:'.$request->ip());
+            // Jika sudah setup akun, maka wajib mengecek password
+            if (!$user->perlu_setup_akun) {
+                if (!\Illuminate\Support\Facades\Auth::attempt(['email' => $user->email, 'password' => $request->password])) {
+                    return response()->json([
+                        'message' => 'NISN atau password salah.'
+                    ], 401);
+                }
+            }
         } else {
             // Email login
             $request->validate([
@@ -96,6 +97,34 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logout berhasil'
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:6',
+        ]);
+
+        $user->email = $request->email;
+        
+        if ($request->filled('password')) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ]
         ]);
     }
 }

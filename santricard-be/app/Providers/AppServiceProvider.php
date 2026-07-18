@@ -32,9 +32,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Konfigurasi Rate Limit khusus Login (Mencegah Brute Force)
-        // Maksimal 3 percobaan per 5 menit per IP
+        // Dilonggarkan untuk development
         \Illuminate\Support\Facades\RateLimiter::for('login', function (\Illuminate\Http\Request $request) {
-            return \Illuminate\Cache\RateLimiting\Limit::perMinutes(5, 3)->by($request->ip());
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(1000)->by($request->ip());
         });
     }
 }
