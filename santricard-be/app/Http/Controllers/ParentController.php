@@ -27,6 +27,7 @@ class ParentController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'parent',
+            'perlu_setup_akun' => false,
         ]);
 
         return response()->json(['message' => 'Orang tua berhasil ditambahkan', 'data' => $parent], 201);
@@ -46,6 +47,7 @@ class ParentController extends Controller
         
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
+            $data['perlu_setup_akun'] = false;
         }
 
         $parent->update($data);
@@ -58,6 +60,21 @@ class ParentController extends Controller
         $parent = User::where('id', $id)->where('role', 'parent')->firstOrFail();
         $students = $parent->students()->with('card:id,student_id,status_aktif')->get();
         return response()->json($students);
+    }
+
+    public function resetPassword(Request $request, string $id)
+    {
+        $request->validate([
+            'password' => 'required|min:6'
+        ]);
+
+        $parent = User::where('id', $id)->where('role', 'parent')->firstOrFail();
+        $parent->update([
+            'password' => Hash::make($request->password),
+            'perlu_setup_akun' => false,
+        ]);
+
+        return response()->json(['message' => 'Password orang tua berhasil direset.']);
     }
 
     public function destroy(string $id)

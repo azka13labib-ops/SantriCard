@@ -18,6 +18,7 @@ Route::post('/auth/login', [AuthController::class, 'login'])->middleware('thrott
 // Protected Routes
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::post('/auth/setup-password', [AuthController::class, 'setupPassword']);
     Route::get('/user', function (Request $request) {
         return $request->user()->load(['students', 'merchant']);
     });
@@ -31,6 +32,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('/parent', [ParentController::class, 'index']);
         Route::post('/parent', [ParentController::class, 'store']);
         Route::get('/parent/{id}/students', [ParentController::class, 'students']);
+        Route::post('/parent/{id}/reset-password', [ParentController::class, 'resetPassword']);
         Route::patch('/parent/{id}', [ParentController::class, 'update']);
         Route::delete('/parent/{id}', [ParentController::class, 'destroy']);
 

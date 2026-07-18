@@ -27,9 +27,10 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation, Wit
                 $parent = User::firstOrCreate(
                     ['email' => $row['parent_email']],
                     [
-                        'name'     => $row['parent_name'],
-                        'password' => bcrypt('password123'),
-                        'role'     => 'parent'
+                        'name'             => $row['parent_name'],
+                        'password'         => bcrypt(Str::random(10)), // Gunakan random password karena akan login via NISN
+                        'role'             => 'parent',
+                        'perlu_setup_akun' => true,
                     ]
                 );
 

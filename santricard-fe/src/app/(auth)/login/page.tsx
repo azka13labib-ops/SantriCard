@@ -10,7 +10,7 @@ import api from "@/lib/axios";
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -23,12 +23,13 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post("/auth/login", { identifier, password });
       const { token, user } = response.data;
 
       const cookieOptions = rememberMe ? { expires: 7 } : {};
       Cookies.set("token", token, cookieOptions);
       Cookies.set("user_role", user.role, cookieOptions);
+      Cookies.set("perlu_setup_akun", user.perlu_setup_akun ? "true" : "false", cookieOptions);
 
       if (user.role === "admin") {
         router.replace("/admin");
@@ -101,21 +102,21 @@ export default function Login() {
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="email">
-                Alamat Email
+              <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="identifier">
+                Alamat Email atau NISN Anak
               </label>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  type="email"
+                  id="identifier"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:text-sm"
-                  placeholder="admin@santricard.com"
+                  placeholder="admin@santricard.com atau 123456789"
                 />
               </div>
             </div>
@@ -131,7 +132,6 @@ export default function Login() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-10 text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 sm:text-sm"
