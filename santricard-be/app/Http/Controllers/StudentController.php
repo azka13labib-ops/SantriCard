@@ -39,10 +39,10 @@ class StudentController extends Controller
             ]);
 
             // Generate Card — menggunakan UUID v4 untuk kriptografis acak
-            $uid_rfid = Str::random(10); // Dummy RFID for now if no scanner
-            $qr_code_hash = (string) Str::uuid(); // UUID v4, cryptographically random
+            $uid_rfid = \Illuminate\Support\Str::random(10); // Dummy RFID for now if no scanner
+            $qr_code_hash = (string) \Illuminate\Support\Str::uuid(); // UUID v4, cryptographically random
 
-            Card::create([
+            \App\Models\Card::create([
                 'student_id' => $student->id,
                 'uid_rfid' => $uid_rfid,
                 'qr_code_hash' => $qr_code_hash,
@@ -88,13 +88,41 @@ class StudentController extends Controller
     public function destroy(string $id)
     {
         $student = Student::findOrFail($id);
-        $student->update(['aktif' => false]);
-        
-        if ($student->card) {
-            $student->card->update(['status_aktif' => false]);
-        }
 
-        return response()->json(['message' => 'Student berhasil dinonaktifkan']);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($student) {
+            $parentId    = $student->parent_id;
+            $hasHistory  = $student->transactions()->exists() || $student->top_ups()->exists();
+
+            if (!$hasHistory) {
+                // Hapus permanen jika belum ada riwayat (membantu admin saat salah import)
+                if ($student->card) {
+                    $student->card->delete();
+                }
+                $student->delete();
+            } else {
+                // Soft-delete (nonaktif) jika sudah ada riwayat transaksi
+                $student->update(['aktif' => false]);
+
+                if ($student->card) {
+                    $student->card->update(['status_aktif' => false]);
+                }
+            }
+
+            // CASCADE: Jika orang tua tidak punya anak lain → soft-delete orang tua juga
+            if ($parentId) {
+                $siblingsCount = Student::where('parent_id', $parentId)
+                    ->where('id', '!=', $student->id)
+                    ->count();
+
+                if ($siblingsCount === 0) {
+                    \App\Models\User::where('id', $parentId)
+                        ->where('role', 'parent')
+                        ->update(['aktif' => false]);
+                }
+            }
+        });
+
+        return response()->json(['message' => 'Operasi hapus siswa berhasil']);
     }
 
     public function saldo(Request $request, string $id)

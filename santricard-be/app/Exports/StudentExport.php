@@ -21,7 +21,6 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             'ID',
-            'Parent ID',
             'Parent Name',
             'NIS',
             'Name',
@@ -37,7 +36,6 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
     {
         return [
             $student->id,
-            $student->parent_id,
             $student->parent ? $student->parent->name : '',
             $student->nis,
             $student->nama,
