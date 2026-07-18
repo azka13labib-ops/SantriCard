@@ -19,6 +19,7 @@ interface Student {
   limit_harian: number;
   aktif: boolean;
   card: { status_aktif: boolean; qr_code_hash: string } | null;
+  parent: { id: number; name: string; email: string } | null;
 }
 
 export default function DataSiswa() {
@@ -134,6 +135,9 @@ export default function DataSiswa() {
                     NIS / Nama
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Orang Tua
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     Kelas
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -157,6 +161,16 @@ export default function DataSiswa() {
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">{student.nama}</div>
                         <div className="text-sm text-gray-500">NIS: {student.nis}</div>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        {student.parent ? (
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{student.parent.name}</div>
+                            <div className="text-xs text-gray-400">{student.parent.email}</div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                         {student.kelas}
@@ -216,7 +230,7 @@ export default function DataSiswa() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
                       Belum ada data student.
                     </td>
                   </tr>

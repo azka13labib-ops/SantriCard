@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         // Manajemen Ortu
         Route::get('/parent', [ParentController::class, 'index']);
         Route::post('/parent', [ParentController::class, 'store']);
+        Route::get('/parent/{id}/students', [ParentController::class, 'students']);
         Route::patch('/parent/{id}', [ParentController::class, 'update']);
         Route::delete('/parent/{id}', [ParentController::class, 'destroy']);
 

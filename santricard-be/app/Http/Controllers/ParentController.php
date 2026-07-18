@@ -53,6 +53,13 @@ class ParentController extends Controller
         return response()->json(['message' => 'Data orang tua berhasil diupdate', 'data' => $parent]);
     }
 
+    public function students(string $id)
+    {
+        $parent = User::where('id', $id)->where('role', 'parent')->firstOrFail();
+        $students = $parent->students()->with('card:id,student_id,status_aktif')->get();
+        return response()->json($students);
+    }
+
     public function destroy(string $id)
     {
         $parent = User::findOrFail($id);

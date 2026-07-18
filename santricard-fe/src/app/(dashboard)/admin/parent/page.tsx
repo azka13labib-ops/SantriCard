@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Loader2, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Loader2, Edit, Trash2, X, Users } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 
@@ -9,11 +9,19 @@ import AddParentModal from "@/components/ui/AddParentModal";
 import EditParentModal from "@/components/ui/EditParentModal";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
+interface Student {
+  id: number;
+  nis: string;
+  nama: string;
+  kelas: string;
+  aktif: boolean;
+}
+
 interface Ortu {
   id: number;
   name: string;
   email: string;
-  siswas_count: number;
+  students_count: number;
 }
 
 export default function DataOrtu() {
@@ -25,6 +33,12 @@ export default function DataOrtu() {
   const [selectedOrtu, setSelectedOrtu] = useState<Ortu | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [ortuToDelete, setOrtuToDelete] = useState<number | null>(null);
+
+  // State for children modal
+  const [isChildrenModalOpen, setIsChildrenModalOpen] = useState(false);
+  const [childrenModalTitle, setChildrenModalTitle] = useState("");
+  const [childrenList, setChildrenList] = useState<Student[]>([]);
+  const [childrenLoading, setChildrenLoading] = useState(false);
 
   const fetchParent = async () => {
     try {
@@ -56,6 +70,29 @@ export default function DataOrtu() {
       alert(msg || "Gagal menghapus data.");
       setIsDeleteModalOpen(false);
       setOrtuToDelete(null);
+    }
+  };
+
+  const handleShowChildren = async (parent: Ortu) => {
+    setChildrenModalTitle(`Anak dari ${parent.name}`);
+    setIsChildrenModalOpen(true);
+    setChildrenLoading(true);
+    setChildrenList([]);
+    try {
+      const res = await api.get("/student");
+      const allStudents: Student[] = (res.data.data || res.data).data || (res.data.data || res.data);
+      // Filter by parent_id using the full student data
+      const resDetail = await api.get(`/parent/${parent.id}/students`).catch(() => null);
+      if (resDetail) {
+        setChildrenList(resDetail.data.data || resDetail.data);
+      } else {
+        // Fallback: filter from all students (if endpoint not available)
+        setChildrenList(allStudents.filter((s: Student & { parent_id?: number }) => (s as { parent_id?: number }).parent_id === parent.id));
+      }
+    } catch {
+      setChildrenList([]);
+    } finally {
+      setChildrenLoading(false);
     }
   };
 
@@ -136,9 +173,14 @@ export default function DataOrtu() {
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="text-sm text-gray-900">
-                          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                            {parent.siswas_count} Santri
-                          </span>
+                          <button
+                            onClick={() => handleShowChildren(parent)}
+                            title="Klik untuk lihat daftar anak"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 hover:bg-emerald-100 transition-colors cursor-pointer"
+                          >
+                            <Users className="h-3 w-3" />
+                            {parent.students_count} Santri
+                          </button>
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -170,6 +212,57 @@ export default function DataOrtu() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Daftar Anak */}
+      {isChildrenModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">{childrenModalTitle}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Daftar santri yang terhubung</p>
+              </div>
+              <button
+                onClick={() => setIsChildrenModalOpen(false)}
+                className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="px-6 py-4 max-h-80 overflow-y-auto">
+              {childrenLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+                </div>
+              ) : childrenList.length === 0 ? (
+                <p className="py-6 text-center text-sm text-gray-400">Tidak ada data santri.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {childrenList.map((child) => (
+                    <li key={child.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-4 py-3">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{child.nama}</div>
+                        <div className="text-xs text-gray-500">NIS: {child.nis} · Kelas {child.kelas}</div>
+                      </div>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${child.aktif ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                        {child.aktif ? "Aktif" : "Nonaktif"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="border-t border-gray-100 px-6 py-3 text-right">
+              <button
+                onClick={() => setIsChildrenModalOpen(false)}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}
