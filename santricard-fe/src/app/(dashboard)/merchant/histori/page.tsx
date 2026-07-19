@@ -16,11 +16,17 @@ interface Transaction {
   };
 }
 
+interface PaginatedTransactions {
+  data: Transaction[];
+  current_page?: number;
+  last_page?: number;
+}
+
 interface PedagangData {
   merchant: string;
   saldo_mengendap: number;
   total_penjualan_30_hari: number;
-  histori_transaksi: Transaction[];
+  histori_transaksi: Transaction[] | PaginatedTransactions;
 }
 
 export default function PedagangHistoriPage() {
@@ -59,12 +65,17 @@ export default function PedagangHistoriPage() {
     }).format(angka);
   };
 
-  const filteredHistori = data?.histori_transaksi.filter(t => 
-    t.student.nama.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  // histori_transaksi is paginated by backend, so the actual array is inside .data
+  const rawHistori = Array.isArray(data?.histori_transaksi) 
+    ? data.histori_transaksi 
+    : (data?.histori_transaksi as PaginatedTransactions)?.data || [];
+
+  const filteredHistori = rawHistori.filter((t: Transaction) => 
+    t.student?.nama?.toLowerCase().includes(search.toLowerCase())
+  );
 
   // Group by date
-  const groupedByDate = filteredHistori.reduce((acc, curr) => {
+  const groupedByDate = filteredHistori.reduce((acc: Record<string, Transaction[]>, curr: Transaction) => {
     const date = new Date(curr.created_at).toLocaleDateString('id-ID', { 
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
@@ -131,7 +142,7 @@ export default function PedagangHistoriPage() {
               <div key={date}>
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{date}</h4>
                 <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm divide-y divide-gray-50">
-                  {groupedByDate[date].map(trx => (
+                  {groupedByDate[date].map((trx: Transaction) => (
                     <div key={trx.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                       <div>
                         <p className="font-semibold text-gray-900">{trx.student.nama}</p>
