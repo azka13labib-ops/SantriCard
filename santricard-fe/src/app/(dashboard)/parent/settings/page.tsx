@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserCircle, Mail, Lock, Save, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { UserCircle, Mail, Lock, Save, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 import api from "@/lib/axios";
 
 export default function ParentSettings() {
   const [user, setUser] = useState<{ id: number; name: string; email: string; role: string } | null>(null);
   const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState(""); // P2-D
   const [password, setPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false); // P2-D
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -41,24 +44,33 @@ export default function ParentSettings() {
       return;
     }
 
+    // P2-D: Wajib isi password saat ini jika ingin ganti password
+    if (password && !currentPassword) {
+      setErrorMsg("Masukkan password saat ini untuk mengubah password.");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload: Record<string, string> = { email };
       if (password) {
+        payload.current_password = currentPassword;
         payload.password = password;
       }
       const res = await api.patch("/user", payload);
       setSuccessMsg(res.data.message || "Profil berhasil diperbarui!");
+      setCurrentPassword("");
       setPassword("");
       setPasswordConfirm("");
-      
-      // Update local state just in case
-      setUser(res.data.user);
-      setEmail(res.data.user.email);
+
+      // Update local state
+      if (res.data.user) {
+        setUser(res.data.user);
+        setEmail(res.data.user.email);
+      }
     } catch (err: unknown) {
-      if (typeof err === 'object' && err !== null && 'response' in err) {
-        const axiosError = err as any;
-        setErrorMsg(axiosError.response?.data?.message || "Terjadi kesalahan saat menyimpan pengaturan.");
+      if (axios.isAxiosError(err)) {
+        setErrorMsg(err.response?.data?.message || "Terjadi kesalahan saat menyimpan pengaturan.");
       } else {
         setErrorMsg("Terjadi kesalahan sistem.");
       }
@@ -135,7 +147,33 @@ export default function ParentSettings() {
               <p className="text-xs text-gray-500 mb-4">
                 Biarkan kosong jika Anda tidak ingin mengubah password saat ini.
               </p>
-              
+
+              {/* P2-D: Field password saat ini */}
+              <div className="mb-4">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                  Password Saat Ini
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Lock className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-10 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="Masukkan password saat ini"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-emerald-600"
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -157,7 +195,7 @@ export default function ParentSettings() {
 
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                    Konfirmasi Password
+                    Konfirmasi Password Baru
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
