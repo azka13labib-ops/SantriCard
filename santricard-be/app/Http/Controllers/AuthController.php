@@ -27,8 +27,18 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Akun orang tua tidak ditemukan.'], 401);
             }
 
-            // Jika sudah setup akun, maka wajib mengecek password
+            // P1-C: Blokir user yang dinonaktifkan admin
+            if (!$user->aktif) {
+                return response()->json(['message' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.'], 403);
+            }
+
+            // Jika sudah setup akun, NISN hanya boleh login jika ada password
             if (!$user->perlu_setup_akun) {
+                // Jika tidak ada password sama sekali → arahkan ke email/password
+                if (!$request->filled('password')) {
+                    return response()->json(['message' => 'Silakan login menggunakan email dan password.'], 401);
+                }
+                // Ada password → verifikasi
                 if (!\Illuminate\Support\Facades\Auth::attempt(['email' => $user->email, 'password' => $request->password])) {
                     return response()->json([
                         'message' => 'NISN atau password salah.'
@@ -48,6 +58,11 @@ class AuthController extends Controller
             }
 
             $user = \App\Models\User::where('email', $identifier)->firstOrFail();
+
+            // P1-C: Blokir user yang dinonaktifkan admin
+            if (!$user->aktif) {
+                return response()->json(['message' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.'], 403);
+            }
             
             if ($user->role === 'parent' && $user->perlu_setup_akun) {
                 return response()->json(['message' => 'Akun belum diaktifkan, silakan login menggunakan NISN anak terlebih dahulu.'], 401);
@@ -105,12 +120,21 @@ class AuthController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:6',
+            'email'            => 'required|email|unique:users,email,' . $user->id,
+            // P2-D: Wajib konfirmasi password lama saat ingin ganti password
+            'current_password' => $request->filled('password') ? 'required' : 'nullable',
+            'password'         => 'nullable|min:6',
         ]);
 
+        // P2-D: Verifikasi password lama sebelum mengganti password baru
+        if ($request->filled('password')) {
+            if (!$request->filled('current_password') || !\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+                return response()->json(['message' => 'Password saat ini tidak sesuai.'], 422);
+            }
+        }
+
         $user->email = $request->email;
-        
+
         if ($request->filled('password')) {
             $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
         }
