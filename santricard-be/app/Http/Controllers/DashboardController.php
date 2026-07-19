@@ -6,65 +6,72 @@ use Illuminate\Http\Request;
 use App\Models\Transaction;
 use App\Models\Student;
 use App\Models\Merchant;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $today = today();
+        // P2-E: Cache selama 5 menit untuk mengurangi beban DB (~15 query menjadi 0 saat cache hit).
+        // Cache di-invalidate setiap 5 menit — acceptable untuk data statistik dashboard.
+        $data = Cache::remember('dashboard_stats', 300, function () {
+            $today = today();
 
-        $transaksisHariIni = Transaction::whereDate('created_at', $today)->get();
-        
-        $totalTransaksi = $transaksisHariIni->count();
-        $transaksiBerhasil = $transaksisHariIni->where('status', 'berhasil')->count();
-        $transaksiDitolak = $transaksisHariIni->where('status', 'ditolak')->count();
-        $nominalTotal = $transaksisHariIni->where('status', 'berhasil')->sum('nominal');
+            $transaksisHariIni = Transaction::whereDate('created_at', $today)->get();
 
-        $totalSiswa = Student::count();
-        $siswaAktif = Student::where('aktif', true)->count();
-        $saldoBeredar = Student::sum('saldo_virtual');
+            $totalTransaksi = $transaksisHariIni->count();
+            $transaksiBerhasil = $transaksisHariIni->where('status', 'berhasil')->count();
+            $transaksiDitolak = $transaksisHariIni->where('status', 'ditolak')->count();
+            $nominalTotal = $transaksisHariIni->where('status', 'berhasil')->sum('nominal');
 
-        $totalPedagang = Merchant::count();
-        // Asumsi merchant aktif jika ada relasi user dan tidak diblokir, sementara anggap semua aktif
-        $pedagangAktif = Merchant::count(); 
+            $totalSiswa = Student::count();
+            $siswaAktif = Student::where('aktif', true)->count();
+            $saldoBeredar = Student::sum('saldo_virtual');
 
-        $transaksiTerakhir = Transaction::with(['student', 'merchant'])
-            ->latest()
-            ->take(5)
-            ->get();
+            // P2-E: Merchant aktif = yang sudah terverifikasi (bukan semua)
+            $totalPedagang = Merchant::count();
+            $pedagangAktif = Merchant::where('terverifikasi', true)->count();
 
-        // Data untuk Chart (7 hari terakhir)
-        $chartData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = \Carbon\Carbon::today()->subDays($i);
-            $dailyTransactions = Transaction::whereDate('created_at', $date)
-                ->where('status', 'berhasil')
-                ->sum('nominal');
-            
-            $chartData[] = [
-                'name' => $date->format('D'), // Misal: Mon, Tue
-                'total' => $dailyTransactions
+            $transaksiTerakhir = Transaction::with(['student', 'merchant'])
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // Data untuk Chart (7 hari terakhir)
+            $chartData = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = \Carbon\Carbon::today()->subDays($i);
+                $dailyTransactions = Transaction::whereDate('created_at', $date)
+                    ->where('status', 'berhasil')
+                    ->sum('nominal');
+
+                $chartData[] = [
+                    'name' => $date->format('D'),
+                    'total' => $dailyTransactions
+                ];
+            }
+
+            return [
+                'transaksi_hari_ini' => [
+                    'total' => $totalTransaksi,
+                    'berhasil' => $transaksiBerhasil,
+                    'ditolak' => $transaksiDitolak,
+                    'nominal_total' => $nominalTotal
+                ],
+                'student' => [
+                    'total' => $totalSiswa,
+                    'aktif' => $siswaAktif,
+                    'saldo_beredar' => $saldoBeredar
+                ],
+                'merchant' => [
+                    'total' => $totalPedagang,
+                    'aktif' => $pedagangAktif
+                ],
+                'transaksi_terakhir' => $transaksiTerakhir,
+                'chart_data' => $chartData
             ];
-        }
+        });
 
-        return response()->json([
-            'transaksi_hari_ini' => [
-                'total' => $totalTransaksi,
-                'berhasil' => $transaksiBerhasil,
-                'ditolak' => $transaksiDitolak,
-                'nominal_total' => $nominalTotal
-            ],
-            'student' => [
-                'total' => $totalSiswa,
-                'aktif' => $siswaAktif,
-                'saldo_beredar' => $saldoBeredar
-            ],
-            'merchant' => [
-                'total' => $totalPedagang,
-                'aktif' => $pedagangAktif
-            ],
-            'transaksi_terakhir' => $transaksiTerakhir,
-            'chart_data' => $chartData
-        ]);
+        return response()->json($data);
     }
 }
