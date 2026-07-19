@@ -52,14 +52,14 @@ class TopUpService implements TopUpServiceInterface
             DB::commit();
 
             return [
-                'topUp' => $topUp,
+                'topup' => $topUp,
                 'saldo_sekarang' => $student->saldo_virtual,
                 'status' => $status
             ];
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('TopupService@processTopup failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            
+
             $code = $e->getCode() >= 400 && $e->getCode() < 500 ? $e->getCode() : 500;
             $msg = $code === 500 ? 'Top-up gagal diproses. Silakan coba lagi.' : $e->getMessage();
             throw new Exception($msg, $code);
@@ -85,7 +85,8 @@ class TopUpService implements TopUpServiceInterface
 
             $student = Student::where('id', $topUp->student_id)->lockForUpdate()->firstOrFail();
 
-            if ($status === TopupStatus::BERHASIL->value) {
+            // FIX P1-A: Was TopupStatus (lowercase u) - fatal error. Now correctly TopUpStatus.
+            if ($status === TopUpStatus::BERHASIL->value) {
                 $student->saldo_virtual += $topUp->nominal;
                 $student->save();
             }
@@ -96,7 +97,7 @@ class TopUpService implements TopUpServiceInterface
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('TopupService@verifyTopup failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            
+
             $code = $e->getCode() >= 400 && $e->getCode() < 500 ? $e->getCode() : 500;
             $msg = $code === 500 ? 'Gagal memverifikasi. Silakan coba lagi.' : $e->getMessage();
             throw new Exception($msg, $code);
