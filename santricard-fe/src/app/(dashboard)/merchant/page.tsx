@@ -14,11 +14,20 @@ interface OfflineTransaction {
 }
 
 const OFFLINE_QUEUE_KEY = "santricard_offline_queue";
+// P3-A: Hapus transaksi offline yang lebih dari 24 jam (mencegah retry loop tak terbatas)
+const OFFLINE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function loadOfflineQueue(): OfflineTransaction[] {
   try {
     const raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const queue: OfflineTransaction[] = raw ? JSON.parse(raw) : [];
+    // Buang entri yang sudah kadaluarsa
+    const now = Date.now();
+    const fresh = queue.filter((t) => now - t.timestamp < OFFLINE_TTL_MS);
+    if (fresh.length !== queue.length) {
+      localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(fresh));
+    }
+    return fresh;
   } catch {
     return [];
   }
@@ -116,10 +125,14 @@ export default function PedagangScannerPage() {
           onScanSuccess,
           onScanFailure
         );
-      } catch (err) {
-        console.error(err);
+      } catch (err: unknown) {
         setIsScanning(false);
-        setStatusMsg({ type: 'error', title: 'Kamera Gagal', text: 'Kamera tidak dapat diakses atau tidak ada izin.'});
+        const error = err as Error;
+        const errMsg = error?.name === 'NotAllowedError' || error?.message?.includes('Permission') 
+          ? 'Izin kamera ditolak. Silakan izinkan akses kamera di pengaturan browser Anda.'
+          : 'Kamera tidak dapat diakses atau tidak ditemukan.';
+          
+        setStatusMsg({ type: 'error', title: 'Kamera Gagal', text: errMsg });
       }
     }, 100);
   };
