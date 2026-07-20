@@ -141,7 +141,7 @@ export default function AdminDashboard() {
                 tickFormatter={(value) => `Rp ${value / 1000}K`}
               />
               <Tooltip 
-                formatter={(value: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value)}
+                formatter={(value: unknown) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(Number(value))}
                 cursor={{ fill: '#f3f4f6' }}
               />
               <Bar dataKey="total" fill="#10b981" radius={[4, 4, 0, 0]} />
