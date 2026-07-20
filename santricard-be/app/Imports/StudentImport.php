@@ -56,7 +56,7 @@ class StudentImport implements ToCollection, WithHeadingRow, WithValidation, Wit
         }
     }
 
-    public function prepareForValidation($data, $index)
+    public function prepareForValidation(array $data, int $index)
     {
         if (isset($data['nis'])) {
             $data['nis'] = trim((string) $data['nis']);
