@@ -55,7 +55,10 @@ export default function DataLaporan() {
   };
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSettlement = async () => {

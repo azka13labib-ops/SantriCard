@@ -31,7 +31,10 @@ export default function ParentSettings() {
   };
 
   useEffect(() => {
-    fetchUser();
+    const timer = setTimeout(() => {
+      fetchUser();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -81,8 +84,10 @@ export default function ParentSettings() {
 
   if (fetchLoading) {
     return (
-      <div className="flex h-full min-h-[400px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      <div className="flex justify-center items-center min-h-100 animate-in fade-in duration-300">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
