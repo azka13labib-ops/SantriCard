@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, WalletCards, LogOut, UserCircle } from "lucide-react";
+import { LayoutDashboard, WalletCards, LogOut, UserCircle, Settings } from "lucide-react";
 import api from "@/lib/axios";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
@@ -36,6 +36,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
   const navItems = [
     { name: "Monitoring Anak", icon: LayoutDashboard, href: "/parent" },
     { name: "Isi Saldo", icon: WalletCards, href: "/parent/topUp" },
+    { name: "Pengaturan", icon: Settings, href: "/parent/settings" },
   ];
 
   return (
