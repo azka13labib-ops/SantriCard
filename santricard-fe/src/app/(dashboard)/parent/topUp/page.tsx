@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Upload, Loader2, CheckCircle2, Clock, XCircle, AlertCircle, QrCode } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, Clock, XCircle, AlertCircle, QrCode, Download } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 
@@ -153,10 +154,18 @@ export default function OrtuTopupPage() {
 
         <div className="mb-6 flex justify-center">
           <div className="p-4 bg-white border-2 border-dashed border-emerald-200 rounded-2xl flex flex-col items-center justify-center shadow-inner">
-             <div className="w-40 h-40 bg-gray-50 flex items-center justify-center mb-2 rounded-xl border border-gray-100">
-               <QrCode className="w-16 h-16 text-emerald-300" />
+             <div className="w-48 h-48 bg-gray-50 flex items-center justify-center mb-2 rounded-xl border border-gray-100 overflow-hidden relative">
+               <Image src="/assets/qris.jpeg" alt="QRIS DANA Bisnis" fill className="object-contain p-2" unoptimized />
              </div>
-             <p className="text-xs text-emerald-600 font-bold">QRIS DANA Bisnis</p>
+             <p className="text-xs text-emerald-600 font-bold mt-2">QRIS DANA Bisnis</p>
+             <a 
+               href="/assets/qris.jpeg" 
+               download="QRIS-SantriCard.jpeg" 
+               className="mt-3 flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-200 transition-colors active:scale-95"
+             >
+               <Download className="w-4 h-4" />
+               Simpan QR
+             </a>
           </div>
         </div>
 
