@@ -121,16 +121,14 @@ class AuthController extends Controller
 
         $request->validate([
             'email'            => 'required|email|unique:users,email,' . $user->id,
-            // P2-D: Wajib konfirmasi password lama saat ingin ganti password
-            'current_password' => $request->filled('password') ? 'required' : 'nullable',
+            // P2-D: Wajib konfirmasi password lama saat ada perubahan profil (email/password)
+            'current_password' => 'required',
             'password'         => 'nullable|min:6',
         ]);
 
-        // P2-D: Verifikasi password lama sebelum mengganti password baru
-        if ($request->filled('password')) {
-            if (!$request->filled('current_password') || !\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
-                return response()->json(['message' => 'Password saat ini tidak sesuai.'], 422);
-            }
+        // Verifikasi password saat ini
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Password saat ini tidak sesuai.'], 422);
         }
 
         $user->email = $request->email;

@@ -10,8 +10,9 @@ export default function ParentSettings() {
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState(""); // P2-D
   const [password, setPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false); // P2-D
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [successMsg, setSuccessMsg] = useState("");
@@ -47,17 +48,30 @@ export default function ParentSettings() {
       return;
     }
 
-    // P2-D: Wajib isi password saat ini jika ingin ganti password
-    if (password && !currentPassword) {
-      setErrorMsg("Masukkan password saat ini untuk mengubah password.");
+    if (email === user?.email && !password) {
+      setSuccessMsg("Tidak ada perubahan untuk disimpan.");
+      return;
+    }
+
+    // Tampilkan modal konfirmasi password
+    setIsConfirmModalOpen(true);
+  };
+
+  const submitUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPassword) {
+      setErrorMsg("Masukkan password saat ini untuk mengonfirmasi perubahan.");
       return;
     }
 
     setLoading(true);
     try {
-      const payload: Record<string, string> = { email };
+      const payload: Record<string, string> = { 
+        email,
+        current_password: currentPassword
+      };
+      
       if (password) {
-        payload.current_password = currentPassword;
         payload.password = password;
       }
       const res = await api.patch("/user", payload);
@@ -65,6 +79,7 @@ export default function ParentSettings() {
       setCurrentPassword("");
       setPassword("");
       setPasswordConfirm("");
+      setIsConfirmModalOpen(false);
 
       // Update local state
       if (res.data.user) {
@@ -72,6 +87,7 @@ export default function ParentSettings() {
         setEmail(res.data.user.email);
       }
     } catch (err: unknown) {
+      setIsConfirmModalOpen(false);
       if (axios.isAxiosError(err)) {
         setErrorMsg(err.response?.data?.message || "Terjadi kesalahan saat menyimpan pengaturan.");
       } else {
@@ -153,32 +169,6 @@ export default function ParentSettings() {
                 Biarkan kosong jika Anda tidak ingin mengubah password saat ini.
               </p>
 
-              {/* P2-D: Field password saat ini */}
-              <div className="mb-4">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Password Saat Ini
-                </label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Lock className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    type={showCurrentPassword ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-10 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    placeholder="Masukkan password saat ini"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-emerald-600"
-                  >
-                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">
@@ -240,6 +230,63 @@ export default function ParentSettings() {
           </div>
         </form>
       </div>
+
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-xl">
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Konfirmasi Password</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Masukkan password Anda saat ini untuk memverifikasi bahwa ini benar-benar Anda.
+              </p>
+              
+              <form onSubmit={submitUpdate}>
+                <div className="mb-6 relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Lock className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-9 pr-10 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    placeholder="Password saat ini"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-emerald-600"
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmModalOpen(false)}
+                    className="flex-1 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || !currentPassword}
+                    className="flex-1 flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-70"
+                  >
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Konfirmasi"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
