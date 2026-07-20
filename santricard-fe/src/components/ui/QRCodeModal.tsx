@@ -67,7 +67,7 @@ export default function QRCodeModal({ isOpen, onClose, siswaData }: QRCodeModalP
           {/* Card Dimensions: typical ID card ratio ~ 2:3 */}
           <div 
             ref={cardRef}
-            className="w-[280px] h-[430px] bg-white rounded-[20px] shadow-sm border border-gray-200 overflow-hidden relative flex flex-col"
+            className="w-72 h-107.5 bg-white rounded-[20px] shadow-sm border border-gray-200 overflow-hidden relative flex flex-col"
           >
             {/* Background Accent */}
             <div className="absolute top-0 left-0 right-0 h-32 bg-emerald-600 rounded-b-[40%] shadow-inner"></div>

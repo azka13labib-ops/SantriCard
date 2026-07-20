@@ -59,7 +59,7 @@ export function SkeletonTable({ columns = 4, rows = 5, className = "" }: { colum
             <tr key={r} className="border-b transition-colors hover:bg-gray-50">
               {Array.from({ length: columns }).map((_, c) => (
                 <td key={c} className="px-6 py-4 align-middle">
-                  <Skeleton className="h-4 w-full max-w-[150px]" />
+                  <Skeleton className="h-4 w-full max-w-36" />
                 </td>
               ))}
             </tr>
@@ -80,7 +80,7 @@ export function SkeletonList({ items = 4, className = "" }: { items?: number, cl
             <Skeleton className="h-4 w-1/3" />
             <Skeleton className="h-3 w-1/4" />
           </div>
-          <Skeleton className="h-4 w-1/5 max-w-[80px]" />
+          <Skeleton className="h-4 w-1/5 max-w-20" />
         </div>
       ))}
     </div>
