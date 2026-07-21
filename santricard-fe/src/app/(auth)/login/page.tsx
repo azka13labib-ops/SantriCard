@@ -60,9 +60,9 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* KIRI - FOTO (Tersembunyi di Mobile) */}
-      <div className="relative hidden w-1/2 lg:block">
+    <div className="flex min-h-screen bg-white lg:bg-gray-50">
+      {/* KIRI - FOTO (Desktop) */}
+      <div className="relative hidden w-1/2 lg:block shrink-0">
         <Image
           src="/assets/download (4).jpg"
           alt="SantriCard Banner"
@@ -81,8 +81,20 @@ export default function Login() {
       </div>
 
       {/* KANAN - FORM LOGIN */}
-      <div className="flex w-full flex-col justify-center px-8 sm:px-16 lg:w-1/2 xl:px-24">
-        <div className="mx-auto w-full max-w-md">
+      <div className="flex w-full flex-col justify-center px-6 sm:px-16 lg:w-1/2 xl:px-24">
+        <div className="mx-auto w-full max-w-md py-8">
+          
+          {/* Ilustrasi Mobile */}
+          <div className="relative mb-8 block h-48 w-full overflow-hidden rounded-2xl shadow-sm lg:hidden">
+            <Image
+              src="/assets/download (4).jpg"
+              alt="SantriCard Mobile Banner"
+              fill
+              priority
+              className="object-cover object-[center_30%]"
+              sizes="(max-width: 1024px) 100vw, 0vw"
+            />
+          </div>
           {/* Logo / Header */}
           <div className="mb-10">
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
