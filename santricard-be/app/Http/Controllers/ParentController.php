@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreParentRequest;
+use App\Http\Requests\UpdateParentRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,13 +16,8 @@ class ParentController extends Controller
         return response()->json($parents);
     }
 
-    public function store(Request $request)
+    public function store(StoreParentRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users'
-        ]);
-
         $parent = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -32,15 +29,9 @@ class ParentController extends Controller
         return response()->json(['message' => 'Orang tua berhasil ditambahkan', 'data' => $parent], 201);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateParentRequest $request, string $id)
     {
         $parent = User::findOrFail($id);
-        
-        $request->validate([
-            'name' => 'sometimes|string',
-            'email' => 'sometimes|email|unique:users,email,' . $parent->id
-        ]);
-
         $data = $request->only('name', 'email');
 
         $parent->update($data);
