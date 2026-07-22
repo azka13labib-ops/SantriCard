@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import { Lock, Mail, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 export default function Login() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,7 +178,14 @@ export default function Login() {
                 </label>
               </div>
               <div className="text-sm">
-                <a href="#" className="font-medium text-emerald-600 hover:text-emerald-500">
+                <a 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsForgotOpen(true);
+                  }}
+                  className="font-medium text-emerald-600 hover:text-emerald-500"
+                >
                   Lupa password?
                 </a>
               </div>
@@ -202,6 +211,16 @@ export default function Login() {
           </form>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={isForgotOpen}
+        onClose={() => setIsForgotOpen(false)}
+        onConfirm={() => setIsForgotOpen(false)}
+        title="Lupa Password?"
+        message="Silakan hubungi Admin Pondok Pesantren di nomor WhatsApp 0812-XXXX-XXXX untuk bantuan reset password Anda."
+        confirmText="Tutup"
+        type="warning"
+      />
     </div>
   );
 }
