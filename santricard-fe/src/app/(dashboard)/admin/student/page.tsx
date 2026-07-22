@@ -66,6 +66,21 @@ export default function DataSiswa() {
       alert("Gagal menonaktifkan student.");
     }
   };
+  const handleExport = async () => {
+    try {
+      const response = await api.get("/student/export", { responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "students.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Gagal melakukan export", error);
+      alert("Gagal melakukan export data. Silakan coba lagi.");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -77,9 +92,7 @@ export default function DataSiswa() {
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex sm:flex-none gap-3">
           <button
             type="button"
-            onClick={() => {
-              window.location.href = "http://localhost:8000/api/student/export";
-            }}
+            onClick={handleExport}
             className="flex items-center gap-x-2 rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50"
           >
             <Download className="h-4 w-4" />
