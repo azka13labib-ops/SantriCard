@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreTransactionRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Card;
@@ -20,14 +21,8 @@ class TransactionController extends Controller
         return response()->json($transactions);
     }
 
-    public function store(Request $request)
+    public function store(StoreTransactionRequest $request)
     {
-        $request->validate([
-            'kode_kartu' => 'required|string',
-            'nominal' => 'required|numeric|min:500|max:20000',
-            'idempotency_key' => 'nullable|string|max:50',
-        ]);
-
         $pedagangId = $request->user()->merchant->id ?? null;
         if (!$pedagangId) {
             return response()->json(['message' => 'Anda bukan merchant'], 403);
