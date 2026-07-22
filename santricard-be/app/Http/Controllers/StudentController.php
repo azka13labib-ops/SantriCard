@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
+use App\Http\Requests\ImportStudentRequest;
 use App\Models\Student;
 use App\Models\Card;
 use Illuminate\Support\Facades\Log;
@@ -16,16 +19,8 @@ class StudentController extends Controller
         return response()->json($students);
     }
 
-    public function store(Request $request)
+    public function store(StoreStudentRequest $request)
     {
-        $request->validate([
-            'parent_id' => 'required|exists:users,id',
-            'nis' => 'required|digits:10|unique:students',
-            'nama' => 'required|string',
-            'kelas' => 'required|string',
-            'limit_harian' => 'required|numeric|min:500|max:20000'
-        ]);
-
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             $student = Student::create([
@@ -70,16 +65,9 @@ class StudentController extends Controller
         return response()->json($student);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateStudentRequest $request, string $id)
     {
         $student = Student::findOrFail($id);
-        
-        $request->validate([
-            'nama' => 'sometimes|string',
-            'kelas' => 'sometimes|string',
-            'limit_harian' => 'sometimes|numeric|min:500|max:20000'
-        ]);
-
         $student->update($request->only('nama', 'kelas', 'limit_harian'));
 
         return response()->json(['message' => 'Student berhasil diupdate', 'data' => $student]);
@@ -162,12 +150,8 @@ class StudentController extends Controller
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\StudentExport, 'students.xlsx');
     }
 
-    public function importExcel(Request $request)
+    public function importExcel(ImportStudentRequest $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv,xls|max:5120',
-        ]);
-
         try {
             \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\StudentImport, $request->file('file'));
             return response()->json(['message' => 'Data students berhasil diimport']);

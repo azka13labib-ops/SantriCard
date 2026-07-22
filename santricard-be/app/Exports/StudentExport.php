@@ -28,7 +28,6 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
             'Virtual Balance',
             'Daily Limit',
             'Status',
-            // SEC-03: RFID Card UID dihapus dari ekspor default (data credential sensitif)
         ];
     }
 
