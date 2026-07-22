@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreMerchantRequest;
+use App\Http\Requests\UpdateMerchantRequest;
 use App\Models\User;
 use App\Models\Merchant;
 use Illuminate\Support\Facades\DB;
@@ -17,16 +19,8 @@ class MerchantController extends Controller
         return response()->json($merchants);
     }
 
-    public function store(Request $request)
+    public function store(StoreMerchantRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'nama_kantin' => 'required|string',
-            'lokasi' => 'required|string'
-        ]);
-
         DB::beginTransaction();
         try {
             $user = User::create([
@@ -62,15 +56,9 @@ class MerchantController extends Controller
         return response()->json($merchant);
     }
 
-    public function update(Request $request, string $id)
+    public function update(UpdateMerchantRequest $request, string $id)
     {
         $merchant = Merchant::findOrFail($id);
-        
-        $request->validate([
-            'nama_kantin' => 'sometimes|string',
-            'lokasi' => 'sometimes|string'
-        ]);
-
         $merchant->update($request->only('nama_kantin', 'lokasi'));
 
         return response()->json(['message' => 'Profil kantin berhasil diupdate', 'data' => $merchant]);
