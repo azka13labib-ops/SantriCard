@@ -14,7 +14,6 @@ export default function Login() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isForgotOpen, setIsForgotOpen] = useState(false);
@@ -28,10 +27,9 @@ export default function Login() {
       const response = await api.post("/auth/login", { identifier, password });
       const { token, user } = response.data;
 
-      const cookieOptions = rememberMe ? { expires: 7 } : {};
-      Cookies.set("token", token, cookieOptions);
-      Cookies.set("user_role", user.role, cookieOptions);
-      Cookies.set("perlu_setup_akun", user.perlu_setup_akun ? "true" : "false", cookieOptions);
+      Cookies.set("token", token);
+      Cookies.set("user_role", user.role);
+      Cookies.set("perlu_setup_akun", user.perlu_setup_akun ? "true" : "false");
 
       if (user.role === "admin") {
         router.replace("/admin");
@@ -163,20 +161,7 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                  Ingat Saya
-                </label>
-              </div>
+            <div className="flex items-center justify-end">
               <div className="text-sm">
                 <a 
                   href="#" 
