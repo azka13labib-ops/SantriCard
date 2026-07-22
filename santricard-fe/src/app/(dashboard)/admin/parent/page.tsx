@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Loader2, Edit, Trash2, X, Users } from "lucide-react";
+import { Plus, Search, Loader2, Edit, Trash2, X, Users, Key } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 import { SkeletonTable, SkeletonText } from "@/components/ui/skeleton";
@@ -34,6 +34,10 @@ export default function DataOrtu() {
   const [selectedOrtu, setSelectedOrtu] = useState<Ortu | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [ortuToDelete, setOrtuToDelete] = useState<number | null>(null);
+  
+  // Reset Password State
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [ortuToReset, setOrtuToReset] = useState<Ortu | null>(null);
 
   // State for children modal
   const [isChildrenModalOpen, setIsChildrenModalOpen] = useState(false);
@@ -71,6 +75,21 @@ export default function DataOrtu() {
       alert(msg || "Gagal menghapus data.");
       setIsDeleteModalOpen(false);
       setOrtuToDelete(null);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!ortuToReset) return;
+    try {
+      await api.post(`/parent/${ortuToReset.id}/reset-password`);
+      setIsResetModalOpen(false);
+      setOrtuToReset(null);
+      alert("Password berhasil direset ke bawaan sistem (santricard2026).");
+    } catch (err: unknown) {
+      console.error(err);
+      alert("Gagal mereset password.");
+      setIsResetModalOpen(false);
+      setOrtuToReset(null);
     }
   };
 
@@ -200,6 +219,16 @@ export default function DataOrtu() {
                         <div className="flex justify-end gap-3">
                           <button 
                             onClick={() => {
+                              setOrtuToReset(parent);
+                              setIsResetModalOpen(true);
+                            }}
+                            className="text-amber-600 hover:text-amber-900" 
+                            title="Reset Password"
+                          >
+                            <Key className="h-5 w-5" />
+                          </button>
+                          <button 
+                            onClick={() => {
                               setSelectedOrtu(parent);
                               setIsEditModalOpen(true);
                             }}
@@ -303,10 +332,24 @@ export default function DataOrtu() {
           setOrtuToDelete(null);
         }}
         onConfirm={handleDelete}
-        title="Konfirmasi Hapus"
-        message="Apakah Anda yakin ingin menghapus akun orang tua ini? (Tidak bisa dihapus jika masih ada student yang terikat)."
-        confirmText="Ya, Hapus"
+        title="Hapus Orang Tua"
+        message="Apakah Anda yakin ingin menghapus data orang tua ini? Data yang dihapus tidak dapat dikembalikan."
+        confirmText="Hapus"
         type="danger"
+      />
+
+      {/* Modal: Confirm Reset Password */}
+      <ConfirmModal
+        isOpen={isResetModalOpen}
+        onClose={() => {
+          setIsResetModalOpen(false);
+          setOrtuToReset(null);
+        }}
+        onConfirm={handleResetPassword}
+        title="Konfirmasi Reset Password"
+        message={`Apakah Anda yakin ingin mereset password akun ${ortuToReset?.name}? Password akan dikembalikan ke default dan pengguna akan diminta membuat ulang saat login berikutnya.`}
+        confirmText="Reset Password"
+        type="warning"
       />
     </div>
   );
