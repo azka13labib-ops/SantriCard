@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\SetupPasswordRequest;
+use App\Http\Requests\UpdateProfileRequest;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'identifier' => 'required|string',
-        ]);
-
         $identifier = $request->identifier;
         $isEmail = str_contains($identifier, '@');
 
@@ -47,10 +46,6 @@ class AuthController extends Controller
             }
         } else {
             // Email login
-            $request->validate([
-                'password' => 'required',
-            ]);
-
             if (!\Illuminate\Support\Facades\Auth::attempt(['email' => $identifier, 'password' => $request->password])) {
                 return response()->json([
                     'message' => 'Email atau password salah.'
@@ -87,12 +82,8 @@ class AuthController extends Controller
         ]);
     }
 
-    public function setupPassword(Request $request)
+    public function setupPassword(SetupPasswordRequest $request)
     {
-        $request->validate([
-            'password' => 'required|min:6'
-        ]);
-
         $user = $request->user();
         if ($user->role !== 'parent') {
             return response()->json(['message' => 'Hanya orang tua yang dapat melakukan aksi ini.'], 403);
@@ -115,17 +106,9 @@ class AuthController extends Controller
         ]);
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateProfileRequest $request)
     {
         $user = $request->user();
-
-        $request->validate([
-            'email'            => 'required|email|unique:users,email,' . $user->id,
-            // P2-D: Wajib konfirmasi password lama saat ada perubahan profil (email/password)
-            'current_password' => 'required',
-            'password'         => 'nullable|min:6',
-        ]);
-
         // Verifikasi password saat ini
         if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
             return response()->json(['message' => 'Password saat ini tidak sesuai.'], 422);
