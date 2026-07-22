@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreSettlementRequest;
 use App\Models\Merchant;
 use App\Models\Settlement;
 use Illuminate\Support\Facades\DB;
@@ -16,13 +17,8 @@ class SettlementController extends Controller
         return response()->json($settlements);
     }
 
-    public function store(Request $request)
+    public function store(StoreSettlementRequest $request)
     {
-        $request->validate([
-            'merchant_id' => 'required|exists:merchants,id',
-            'catatan' => 'nullable|string'
-        ]);
-
         DB::beginTransaction();
         try {
             // Lock merchant record
