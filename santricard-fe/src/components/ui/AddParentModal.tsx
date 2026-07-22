@@ -6,8 +6,7 @@ import api from "@/lib/axios";
 export default function AddParentModal({ isOpen, onClose, onAdded }: { isOpen: boolean, onClose: () => void, onAdded: () => void }) {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    password: ""
+    email: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +22,7 @@ export default function AddParentModal({ isOpen, onClose, onAdded }: { isOpen: b
       await api.post("/parent", formData);
       onAdded();
       onClose();
-      setFormData({ name: "", email: "", password: "" });
+      setFormData({ name: "", email: "" });
     } catch (error: unknown) {
       console.error(error);
       if (axios.isAxiosError(error)) {
@@ -75,19 +74,6 @@ export default function AddParentModal({ isOpen, onClose, onAdded }: { isOpen: b
               placeholder="Misal: budi@gmail.com"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              className="mt-1 block w-full rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border border-gray-300"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Minimal 6 karakter"
-            />
-          </div>
-
           <div className="pt-4 flex gap-3 justify-end">
             <button
               type="button"

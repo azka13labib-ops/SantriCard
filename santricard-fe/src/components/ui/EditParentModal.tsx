@@ -17,8 +17,7 @@ export default function EditParentModal({
 }) {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    password: ""
+    email: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,8 +28,7 @@ export default function EditParentModal({
       void (async () => {
         setFormData({
           name: ortuData.name,
-          email: ortuData.email,
-          password: ""
+          email: ortuData.email
         });
         setError("");
       })();
@@ -49,14 +47,10 @@ export default function EditParentModal({
     setError("");
 
     try {
-      // If password is empty, don't send it
       const payload: Record<string, string> = {
         name: formData.name,
         email: formData.email
       };
-      if (formData.password.trim() !== "") {
-        payload.password = formData.password;
-      }
 
       await api.patch(`/parent/${ortuData.id}`, payload);
       setIsConfirmOpen(false);
@@ -110,17 +104,6 @@ export default function EditParentModal({
               className="mt-1 block w-full rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border border-gray-300"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Password Baru <span className="text-gray-400 font-normal">(Opsional)</span></label>
-            <input
-              type="password"
-              minLength={6}
-              className="mt-1 block w-full rounded-md shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border border-gray-300"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Kosongkan jika tidak ingin mengubah"
             />
           </div>
 

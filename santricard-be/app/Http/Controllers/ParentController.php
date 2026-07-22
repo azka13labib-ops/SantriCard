@@ -18,16 +18,15 @@ class ParentController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6'
+            'email' => 'required|email|unique:users'
         ]);
 
         $parent = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make('santricard2026'),
             'role' => 'parent',
-            'perlu_setup_akun' => false,
+            'perlu_setup_akun' => true,
         ]);
 
         return response()->json(['message' => 'Orang tua berhasil ditambahkan', 'data' => $parent], 201);
@@ -39,16 +38,10 @@ class ParentController extends Controller
         
         $request->validate([
             'name' => 'sometimes|string',
-            'email' => 'sometimes|email|unique:users,email,' . $parent->id,
-            'password' => 'sometimes|min:6'
+            'email' => 'sometimes|email|unique:users,email,' . $parent->id
         ]);
 
         $data = $request->only('name', 'email');
-        
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-            $data['perlu_setup_akun'] = false;
-        }
 
         $parent->update($data);
 
@@ -62,16 +55,12 @@ class ParentController extends Controller
         return response()->json($students);
     }
 
-    public function resetPassword(Request $request, string $id)
+    public function resetPassword(string $id)
     {
-        $request->validate([
-            'password' => 'required|min:6'
-        ]);
-
         $parent = User::where('id', $id)->where('role', 'parent')->firstOrFail();
         $parent->update([
-            'password' => Hash::make($request->password),
-            'perlu_setup_akun' => false,
+            'password' => Hash::make('santricard2026'),
+            'perlu_setup_akun' => true,
         ]);
 
         return response()->json(['message' => 'Password orang tua berhasil direset.']);
