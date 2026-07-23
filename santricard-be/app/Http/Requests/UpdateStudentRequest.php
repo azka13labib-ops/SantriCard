@@ -12,7 +12,7 @@ class UpdateStudentRequest extends FormRequest
         return [
             'nis' => 'sometimes|string|unique:students,nis,' . $id,
             'nama' => 'sometimes|string',
-            'kelas' => 'sometimes|string|in:VII-1,VII-2,VII-3,VIII-1,VIII-2,VIII-3,IX-1,IX-2,IX-3',
+            'kelas' => 'sometimes|string|exists:school_classes,name',
             'limit_harian' => 'sometimes|numeric|min:0',
             'aktif' => 'sometimes|boolean',
             'parent_id' => 'sometimes|exists:users,id',

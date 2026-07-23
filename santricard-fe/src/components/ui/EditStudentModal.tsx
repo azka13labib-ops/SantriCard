@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
+import CustomSelect from "./CustomSelect";
 import ConfirmModal from "./ConfirmModal";
 
 interface Student {
@@ -28,19 +29,32 @@ export default function EditStudentModal({ isOpen, onClose, onSiswaUpdated, sisw
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [classList, setClassList] = useState<any[]>([]);
+  const [loadingClass, setLoadingClass] = useState(false);
 
   useEffect(() => {
-    if (siswaData && isOpen) {
-      setTimeout(() => {
-        setFormData({
-          nama: siswaData.nama,
-          kelas: siswaData.kelas,
-          limit_harian: siswaData.limit_harian.toString(),
-        });
-        setError("");
-      }, 0);
+    if (isOpen && siswaData) {
+      setFormData({
+        nama: siswaData.nama,
+        kelas: siswaData.kelas,
+        limit_harian: siswaData.limit_harian.toString(),
+      });
+      setError("");
+
+      const fetchClasses = async () => {
+        try {
+          setLoadingClass(true);
+          const res = await api.get('/school-classes');
+          setClassList(res.data);
+        } catch (err: any) {
+          console.error("Gagal mengambil data kelas:", err);
+        } finally {
+          setLoadingClass(false);
+        }
+      };
+      fetchClasses();
     }
-  }, [siswaData, isOpen]);
+  }, [isOpen, siswaData]);
 
   if (!isOpen || !siswaData) return null;
 
@@ -113,29 +127,13 @@ export default function EditStudentModal({ isOpen, onClose, onSiswaUpdated, sisw
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Kelas</label>
-            <select
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border bg-white"
+            <CustomSelect
+              options={classList}
               value={formData.kelas}
-              onChange={(e) => setFormData({ ...formData, kelas: e.target.value })}
-            >
-              <option value="" disabled>Pilih Kelas</option>
-              <optgroup label="Kelas VII">
-                <option value="VII-1">1</option>
-                <option value="VII-2">2</option>
-                <option value="VII-3">3</option>
-              </optgroup>
-              <optgroup label="Kelas VIII">
-                <option value="VIII-1">1</option>
-                <option value="VIII-2">2</option>
-                <option value="VIII-3">3</option>
-              </optgroup>
-              <optgroup label="Kelas IX">
-                <option value="IX-1">1</option>
-                <option value="IX-2">2</option>
-                <option value="IX-3">3</option>
-              </optgroup>
-            </select>
+              onChange={(val) => setFormData({ ...formData, kelas: val })}
+              placeholder={loadingClass ? "Memuat..." : "Pilih Kelas"}
+              disabled={loadingClass}
+            />
           </div>
 
           <div>

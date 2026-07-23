@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { X, Loader2 } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
+import CustomSelect from "./CustomSelect";
+import SimpleSelect from "./SimpleSelect";
 
 export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isOpen: boolean, onClose: () => void, onSiswaAdded: () => void }) {
   const [formData, setFormData] = useState({
@@ -15,23 +17,43 @@ export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isO
   const [error, setError] = useState("");
   const [ortuList, setOrtuList] = useState<{id: number, name: string, email: string}[]>([]);
   const [loadingOrtu, setLoadingOrtu] = useState(false);
+  const [classList, setClassList] = useState<any[]>([]);
+  const [loadingClass, setLoadingClass] = useState(false);
+
+  const fetchParents = async () => {
+    setLoadingOrtu(true);
+    try {
+      const res = await api.get('/users/parent');
+      setOrtuList(res.data);
+      if (res.data.length > 0 && !formData.parent_id) {
+        setFormData(prev => ({ ...prev, parent_id: res.data[0].id.toString() }));
+      }
+    } catch (err) {
+      console.error("Gagal memuat data orang tua", err);
+    } finally {
+      setLoadingOrtu(false);
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      setLoadingClass(true);
+      const res = await api.get('/school-classes');
+      setClassList(res.data);
+    } catch (err: any) {
+      console.error("Gagal mengambil data kelas:", err);
+    } finally {
+      setLoadingClass(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
-    void (async () => {
-      setLoadingOrtu(true);
-      try {
-        const res = await api.get('/users/parent');
-        setOrtuList(res.data);
-        if (res.data.length > 0 && !formData.parent_id) {
-          setFormData(prev => ({ ...prev, parent_id: res.data[0].id.toString() }));
-        }
-      } catch (err) {
-        console.error("Gagal memuat data orang tua", err);
-      } finally {
-        setLoadingOrtu(false);
-      }
-    })();
+    
+    setFormData({ nis: "", nama: "", kelas: "", limit_harian: "", parent_id: "" });
+    setError("");
+    fetchParents();
+    fetchClasses();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -80,23 +102,16 @@ export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isO
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Pilih Orang Tua / Wali</label>
-            <select
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border bg-white"
+            <SimpleSelect
+              options={ortuList.map(parent => ({
+                value: parent.id.toString(),
+                label: `${parent.name} (${parent.email})`
+              }))}
               value={formData.parent_id}
-              onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
+              onChange={(val) => setFormData({ ...formData, parent_id: val })}
+              placeholder={loadingOrtu ? "Memuat data..." : "Pilih Orang Tua / Wali"}
               disabled={loadingOrtu}
-            >
-              {loadingOrtu ? (
-                <option value="">Memuat data...</option>
-              ) : (
-                ortuList.map(parent => (
-                  <option key={parent.id} value={parent.id}>
-                    {parent.name} ({parent.email})
-                  </option>
-                ))
-              )}
-            </select>
+            />
             {ortuList.length === 0 && !loadingOrtu && (
               <p className="mt-1 text-xs text-red-500">Tidak ada akun orang tua yang tersedia. Harap buat akun orang tua terlebih dahulu.</p>
             )}
@@ -138,29 +153,13 @@ export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isO
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Kelas</label>
-            <select
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border bg-white"
+            <CustomSelect
+              options={classList}
               value={formData.kelas}
-              onChange={(e) => setFormData({ ...formData, kelas: e.target.value })}
-            >
-              <option value="" disabled>Pilih Kelas</option>
-              <optgroup label="Kelas VII">
-                <option value="VII-1">1</option>
-                <option value="VII-2">2</option>
-                <option value="VII-3">3</option>
-              </optgroup>
-              <optgroup label="Kelas VIII">
-                <option value="VIII-1">1</option>
-                <option value="VIII-2">2</option>
-                <option value="VIII-3">3</option>
-              </optgroup>
-              <optgroup label="Kelas IX">
-                <option value="IX-1">1</option>
-                <option value="IX-2">2</option>
-                <option value="IX-3">3</option>
-              </optgroup>
-            </select>
+              onChange={(val) => setFormData({ ...formData, kelas: val })}
+              placeholder={loadingClass ? "Memuat..." : "Pilih Kelas"}
+              disabled={loadingClass}
+            />
           </div>
 
           <div>

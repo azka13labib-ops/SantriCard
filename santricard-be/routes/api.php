@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SchoolClassController;
 use App\Http\Controllers\TopUpController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\SettlementController;
@@ -62,6 +63,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index']);
+        
+        // School Classes
+        Route::get('/school-classes', [SchoolClassController::class, 'index']);
         
         // Transaction Global
         Route::get('/transaction', [TransactionController::class, 'index']);
