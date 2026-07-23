@@ -11,6 +11,7 @@ class StoreStudentRequest extends FormRequest
         'parent_id' => 'required|exists:users,id',
         'nis' => 'required|string|unique:students,nis',
         'nama' => 'required|string',
+        'jenis_kelamin' => 'required|in:LK,PR',
         'kelas' => 'required|string|exists:school_classes,name',
         'limit_harian' => 'required|numeric|min:0',
     ]; }

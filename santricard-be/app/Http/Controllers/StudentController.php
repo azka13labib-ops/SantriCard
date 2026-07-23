@@ -27,6 +27,7 @@ class StudentController extends Controller
                 'parent_id' => $request->parent_id,
                 'nis' => $request->nis,
                 'nama' => $request->nama,
+                'jenis_kelamin' => $request->jenis_kelamin,
                 'kelas' => $request->kelas,
                 'saldo_virtual' => 0,
                 'limit_harian' => $request->limit_harian,
@@ -68,7 +69,7 @@ class StudentController extends Controller
     public function update(UpdateStudentRequest $request, string $id)
     {
         $student = Student::findOrFail($id);
-        $student->update($request->only('nama', 'kelas', 'limit_harian'));
+        $student->update($request->only('nama', 'jenis_kelamin', 'kelas', 'limit_harian'));
 
         return response()->json(['message' => 'Student berhasil diupdate', 'data' => $student]);
     }
