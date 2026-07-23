@@ -10,6 +10,7 @@ class Student extends Model
         'parent_id',
         'nis',
         'nama',
+        'jenis_kelamin',
         'kelas',
         'saldo_virtual',
         'limit_harian',
