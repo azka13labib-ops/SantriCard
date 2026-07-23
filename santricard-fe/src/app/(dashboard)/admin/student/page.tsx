@@ -19,6 +19,7 @@ interface Student {
   saldo_virtual: number;
   limit_harian: number;
   aktif: boolean;
+  jenis_kelamin: string;
   card: { status_aktif: boolean; qr_code_hash: string } | null;
   parent: { id: number; name: string; email: string } | null;
 }
@@ -34,6 +35,15 @@ export default function DataSiswa() {
   const [selectedSiswa, setSelectedSiswa] = useState<Student | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [siswaToDelete, setSiswaToDelete] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'ALL' | 'LK' | 'PR'>('ALL');
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredStudents = students.filter(student => {
+    const matchesTab = activeTab === 'ALL' || student.jenis_kelamin === activeTab;
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = student.nama.toLowerCase().includes(searchLower) || student.nis.toLowerCase().includes(searchLower);
+    return matchesTab && matchesSearch;
+  });
 
   const fetchStudent = async () => {
     try {
@@ -125,12 +135,36 @@ export default function DataSiswa() {
 
       {/* Tabel Data Student */}
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+            <button
+              onClick={() => setActiveTab('ALL')}
+              className={`${activeTab === 'ALL' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+            >
+              Semua
+            </button>
+            <button
+              onClick={() => setActiveTab('LK')}
+              className={`${activeTab === 'LK' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+            >
+              Santri Laki-laki
+            </button>
+            <button
+              onClick={() => setActiveTab('PR')}
+              className={`${activeTab === 'PR' ? 'border-emerald-500 text-emerald-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+            >
+              Santri Perempuan
+            </button>
+          </nav>
+        </div>
         <div className="border-b border-gray-200 px-6 py-4 flex gap-4">
           <div className="relative max-w-sm flex-1">
             <Search className="pointer-events-none absolute inset-y-0 left-3 h-full w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Cari NIS atau Nama..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full rounded-md border-0 py-2 pl-9 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
             />
           </div>
@@ -169,8 +203,8 @@ export default function DataSiswa() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {students.length > 0 ? (
-                  students.map((student) => (
+                {filteredStudents.length > 0 ? (
+                  filteredStudents.map((student) => (
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">{student.nama}</div>
@@ -245,7 +279,7 @@ export default function DataSiswa() {
                 ) : (
                   <tr>
                     <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
-                      Belum ada data student.
+                      Tidak ada data student yang ditemukan.
                     </td>
                   </tr>
                 )}
