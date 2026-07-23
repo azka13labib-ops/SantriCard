@@ -3,12 +3,14 @@ import { X, Loader2 } from "lucide-react";
 import axios from "axios";
 import api from "@/lib/axios";
 import CustomSelect from "./CustomSelect";
+import SimpleSelect from "./SimpleSelect";
 import ConfirmModal from "./ConfirmModal";
 
 interface Student {
   id: number;
   nis: string;
   nama: string;
+  jenis_kelamin: string;
   kelas: string;
   limit_harian: number;
 }
@@ -23,6 +25,7 @@ interface EditStudentModalProps {
 export default function EditStudentModal({ isOpen, onClose, onSiswaUpdated, siswaData }: EditStudentModalProps) {
   const [formData, setFormData] = useState({
     nama: "",
+    jenis_kelamin: "LK",
     kelas: "",
     limit_harian: "",
   });
@@ -36,6 +39,7 @@ export default function EditStudentModal({ isOpen, onClose, onSiswaUpdated, sisw
     if (isOpen && siswaData) {
       setFormData({
         nama: siswaData.nama,
+        jenis_kelamin: siswaData.jenis_kelamin || 'LK',
         kelas: siswaData.kelas,
         limit_harian: siswaData.limit_harian.toString(),
       });
@@ -122,6 +126,18 @@ export default function EditStudentModal({ isOpen, onClose, onSiswaUpdated, sisw
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm text-black py-2 px-3 border"
               value={formData.nama}
               onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+            <SimpleSelect
+              options={[
+                { value: 'LK', label: 'Laki-laki (LK)' },
+                { value: 'PR', label: 'Perempuan (PR)' }
+              ]}
+              value={formData.jenis_kelamin}
+              onChange={(val) => setFormData({ ...formData, jenis_kelamin: val })}
             />
           </div>
 

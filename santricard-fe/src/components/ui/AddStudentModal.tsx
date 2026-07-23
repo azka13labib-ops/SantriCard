@@ -9,6 +9,7 @@ export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isO
   const [formData, setFormData] = useState({
     nis: "",
     nama: "",
+    jenis_kelamin: "LK",
     kelas: "",
     limit_harian: "",
     parent_id: "" 
@@ -50,7 +51,7 @@ export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isO
   useEffect(() => {
     if (!isOpen) return;
     
-    setFormData({ nis: "", nama: "", kelas: "", limit_harian: "", parent_id: "" });
+    setFormData({ nis: "", nama: "", jenis_kelamin: "LK", kelas: "", limit_harian: "", parent_id: "" });
     setError("");
     fetchParents();
     fetchClasses();
@@ -148,6 +149,18 @@ export default function AddStudentModal({ isOpen, onClose, onSiswaAdded }: { isO
               value={formData.nama}
               onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
               placeholder="Misal: Budi Santoso"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+            <SimpleSelect
+              options={[
+                { value: 'LK', label: 'Laki-laki (LK)' },
+                { value: 'PR', label: 'Perempuan (PR)' }
+              ]}
+              value={formData.jenis_kelamin}
+              onChange={(val) => setFormData({ ...formData, jenis_kelamin: val })}
             />
           </div>
 
