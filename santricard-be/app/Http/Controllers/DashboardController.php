@@ -12,8 +12,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // P2-E: Cache selama 5 menit untuk mengurangi beban DB (~15 query menjadi 0 saat cache hit).
-        // Cache di-invalidate setiap 5 menit — acceptable untuk data statistik dashboard.
         $data = Cache::remember('dashboard_stats', 300, function () {
             $today = today();
 
